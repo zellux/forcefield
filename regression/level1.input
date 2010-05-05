@@ -1,0 +1,2 @@
+SET name = "老赵"
+RETURN "Hello, " + name
