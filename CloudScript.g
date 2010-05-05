@@ -42,7 +42,7 @@ stmts : stmt (NEWLINE+ stmt)* NEWLINE*;
 
 expr returns [value]
     : e=multExpr {value = $e.value;}
-        ('+' e=multExpr {$value += $e.value;}
+        ('+' e=multExpr {$value = add($value, $e.value);}
         |'-' e=multExpr {$value -= $e.value;}
         )*
     ;
@@ -55,12 +55,13 @@ multExpr returns [value]
 atom returns [value]
     : NUMBER {$value = int($NUMBER.text);}
     | ID {$value = lookup($ID.text);}
+    | STRING_LITERAL {$value = $STRING_LITERAL.text;}
     | '(' expr ')'
     ;
 
 set_stmt : 'SET' ID '=' expr {set($ID.text, $expr.value);};
 
-return_stmt : 'RETURN' expr;
+return_stmt : 'RETURN' expr {ret($expr.value);};
         
 stmt : set_stmt | return_stmt;
 
@@ -77,7 +78,7 @@ fragment UPPER: 'A'..'Z';
 fragment SPACE: ' ' | '\t';
 
 WHITESPACE: SPACE+ { $channel = HIDDEN;};
-STRING_LITERAL : '"' (.)* '"';
+STRING_LITERAL : '"' (.)* '"' {self.text = self.text[1:-1];};
 NEWLINE : '\r'? '\n';
 
 fragment DIGIT : '0'..'9' ;
