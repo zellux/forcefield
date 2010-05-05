@@ -1,1 +1,3 @@
 SET a = 1+3
+SET b = a*2
+SET c = a*b+3*a*a

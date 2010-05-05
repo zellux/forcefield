@@ -12,6 +12,7 @@ import sys
 import traceback
 import logging
 
+from environment import *
 from CloudScriptLexer import CloudScriptLexer
 
 logging.basicConfig(level=logging.DEBUG)
@@ -53,11 +54,11 @@ multExpr returns [value]
     
 atom returns [value]
     : NUMBER {$value = int($NUMBER.text);}
-    | ID
+    | ID {$value = lookup($ID.text);}
     | '(' expr ')'
     ;
 
-set_stmt : 'SET' ID '=' expr {logging.debug('SET ' + $ID.text + ' TO ' + str($expr.value));};
+set_stmt : 'SET' ID '=' expr {set($ID.text, $expr.value);};
 
 return_stmt : 'RETURN' expr;
         
