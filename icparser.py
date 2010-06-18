@@ -17,7 +17,7 @@ arithmaticExpr = operatorPrecedence(operand,
 ic_bininteger = "0" + oneOf("b B") + Word("01")
 ic_octinteger = "0" + Suppress(Optional(oneOf("o O"))) + Word("01234567")
 ic_hexinteger = "0" + oneOf("x X") + Word(hexnums)
-ic_decimalinteger = (oneOf("1 2 3 4 5 6 7 8 9") + Word(nums)) | Literal("0")
+ic_decimalinteger = (Regex("[1-9]") + Word(nums)) | Literal("0")
 ic_integer = ic_bininteger | ic_octinteger | ic_hexinteger | ic_decimalinteger
 #ic_longinteger = ic_integer + oneOf("l L")
 
@@ -64,10 +64,35 @@ def __removeListWrapper(tokens):
 
 ic_arithmetic_operand.setParseAction(__removeListWrapper)
 
-
 def __groupExpr(tokens):
-    pass
+    '''因为未做加法和乘法的优先级的判断，所以准备用个方法把这事做了'''
+    if len(tokens) < 5:
+        return tokens
+    stack = []
+    stack.append(tokens[0])
+    for (i, v) in enumerate(tokens[1:]):
+        if (i % 2 == 0):
+            if "*/%".find(v) >= 0:
+                top = stack.pop()
+                if type(top) == type([]):
+                    top.append(v)
+                else:
+                    top = [top, v]
+                stack.append(top)
+            else:
+                stack.append(v)
+        else:
+            top = stack.pop()
+            if type(top) == type([]):
+                top.append(v)
+                stack.append(top)
+            else:
+                stack.append(top)
+                stack.append(v)
+    return stack
 
 if __name__ == "__main__":
-    print ic_identifier.parseString("_32342")
+    print ic_expr.parseString("+123+ +1231.123e11*_abc/(.23e10 - incr++) + 'test string' + () + \"def\"")
+    ic_expr.setParseAction(__groupExpr)
+    #print ic_identifier.parseString("_32342")
     print ic_expr.parseString("+123+ +1231.123e11*_abc/(.23e10 - incr++) + 'test string' + () + \"def\"")
