@@ -1,4 +1,5 @@
 SET a = 1+3
 SET b = a*2
 SET c = a*b+3*a*a
-SET d = "Hello"
+SET d = 4-1-1
+SET e = a*(b+3)*a

@@ -5,6 +5,13 @@ import logging
 
 bindings = {}
 
+class ReturnValue(Exception):
+    def __init__(self, value):
+        self.value = value.encode('utf-8')
+
+    def getValue(self):
+        return self.value
+        
 def lookup(key):
     if bindings.has_key(key):
         object = bindings[key]
@@ -28,4 +35,5 @@ def add(op1, op2):
         
 def ret(value):
     logging.debug('Returning ' + unicode(value))
+    raise ReturnValue(value)
     

@@ -1,20 +1,46 @@
 #!/usr/bin/bash
 
+"""
+Interprete the given file
+
+Usage: python interpreter.py [--nodebug] [--param=<param>]
+"""
+
 import sys
+import logging
+import getopt
+import base64
 from antlr3 import *
+from environment import *
 from CloudScriptLexer import CloudScriptLexer
 from CloudScriptParser import CloudScriptParser
 
-def parse(filename):
-    char_stream = ANTLRFileStream(filename, encoding='utf-8')
+def parse():
+    char_stream = ANTLRInputStream(sys.stdin, encoding='utf-8')
     lexer = CloudScriptLexer(char_stream)
     tokens = CommonTokenStream(lexer)
     parser = CloudScriptParser(tokens)
 
     try:
         parser.stmts()
+    except ReturnValue as v:
+        print v.getValue()
     except RecognitionException:
         traceback.print_stack()
 
 if __name__ == '__main__':
-    parse(sys.argv[1])
+    opts, args = getopt.getopt(sys.argv[1:], "", ["help", "nodebug", "param="])
+    
+    debug = True
+    for opt, arg in opts:
+        if opt in ('--nodebug'):
+            debug = False
+        if opt in ('--param'):
+            params = eval(base64.b64decode(arg))
+            
+    if debug:
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.WARNING)
+
+    parse()

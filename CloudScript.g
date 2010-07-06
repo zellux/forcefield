@@ -15,7 +15,6 @@ import logging
 from environment import *
 from CloudScriptLexer import CloudScriptLexer
 
-logging.basicConfig(level=logging.DEBUG)
 }
 
 @main {
@@ -35,7 +34,6 @@ def main(argv, otherArg=None):
  * PARSER RULES
  *------------------------------------------------------------------*/
 
-// TODO: support multiple operators, for example, a+b+c
 // TODO: support parenthesis
 
 stmts : stmt (NEWLINE+ stmt)* NEWLINE*;
@@ -56,7 +54,7 @@ atom returns [value]
     : NUMBER {$value = int($NUMBER.text);}
     | ID {$value = lookup($ID.text);}
     | STRING_LITERAL {$value = $STRING_LITERAL.text;}
-    | '(' expr ')'
+    | '(' expr ')' {$value = $expr.value;}
     ;
 
 set_stmt : 'SET' ID '=' expr {set($ID.text, $expr.value);};
