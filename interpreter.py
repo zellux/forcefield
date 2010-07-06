@@ -11,19 +11,25 @@ import logging
 import getopt
 import base64
 import environment
-from antlr3 import *
+import antlr3
+import antlr3.tree
 from environment import *
-from CloudScriptLexer import CloudScriptLexer
-from CloudScriptParser import CloudScriptParser
+from ExprLexer import ExprLexer
+from ExprParser import ExprParser
+import Eval
 
 def parse():
-    char_stream = ANTLRInputStream(sys.stdin, encoding='utf-8')
-    lexer = CloudScriptLexer(char_stream)
-    tokens = CommonTokenStream(lexer)
-    parser = CloudScriptParser(tokens)
+    char_stream = antlr3.ANTLRInputStream(sys.stdin, encoding='utf-8')
+    lexer = ExprLexer(char_stream)
+    tokens = antlr3.CommonTokenStream(lexer)
+    parser = ExprParser(tokens)
+    r = parser.prog()
+    root = r.tree
+    nodes = antlr3.tree.CommonTreeNodeStream(root)
+    walker = Eval.Eval(nodes)
 
     try:
-        parser.stmts()
+        walker.prog()
     except ReturnValue as v:
         print v.getValue()
     except RecognitionException:
