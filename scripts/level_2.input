@@ -1,0 +1,2 @@
+SET name = HTTP["name"]
+RETURN "Hello, " + name

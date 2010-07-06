@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+
 """
 Maintain environment information
 """
@@ -21,17 +23,17 @@ def lookup(key):
         return None
 
 def set(key, value):
-    logging.debug('Set ' + key + ' to ' + unicode(value))
+    logging.debug('Set ' + key + ' to ' + repr(value))
     bindings[key] = value
 
 def add(op1, op2):
-    logging.debug('Adding ' + unicode(op1) + ' and ' + unicode(op2))
+    logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
     if isinstance(op1, int):
         return op1 + op2
     elif isinstance(op1, str) or isinstance(op1, unicode):
-        return unicode(op1) + unicode(op2)
+        return op1 + unicode(op2)
     else:
-        logging.warning('Unknown type ' + unicode(type(value)))
+        logging.warning('Unknown type ' + str(type(op1)))
         
 def ret(value):
     logging.debug('Returning ' + unicode(value))

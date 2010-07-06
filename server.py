@@ -3,7 +3,7 @@
 import logging
 import tornado.httpserver
 import tornado.web
-import os
+import os, sys
 import base64
 from urllib2 import urlparse
 from subprocess import Popen
@@ -22,7 +22,9 @@ class MainHandler(tornado.web.RequestHandler):
             raise tornado.web.HTTPError(404)
         script = open(filename, 'r')
         decoded = base64.b64encode(repr(args))
-        p = Popen('python interpreter.py --nodebug --param="%s"' % decoded, shell=True, stdin=script, stdout=subprocess.PIPE)
+        cmd = 'python interpreter.py --nodebug --param="%s"' % decoded
+        logging.debug(cmd)
+        p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE)
         output = p.stdout.read()
         self.write(output)
         
@@ -32,5 +34,5 @@ application = tornado.web.Application([
 
 if __name__ == "__main__":
     http_server = tornado.httpserver.HTTPServer(application)
-    http_server.listen(8888)
+    http_server.listen(int(sys.argv[1]))
     tornado.ioloop.IOLoop.instance().start()

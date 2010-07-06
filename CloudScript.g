@@ -39,7 +39,7 @@ def main(argv, otherArg=None):
 stmts : stmt (NEWLINE+ stmt)* NEWLINE*;
 
 expr returns [value]
-    : e=multExpr {value = $e.value;}
+    : e=multExpr {$value = $e.value;}
         ('+' e=multExpr {$value = add($value, $e.value);}
         |'-' e=multExpr {$value -= $e.value;}
         )*
@@ -53,6 +53,7 @@ multExpr returns [value]
 atom returns [value]
     : NUMBER {$value = int($NUMBER.text);}
     | ID {$value = lookup($ID.text);}
+    | ID '[' expr ']' {dict = lookup($ID.text); $value = dict[$expr.text];}
     | STRING_LITERAL {$value = $STRING_LITERAL.text;}
     | '(' expr ')' {$value = $expr.value;}
     ;

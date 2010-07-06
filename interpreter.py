@@ -10,6 +10,7 @@ import sys
 import logging
 import getopt
 import base64
+import environment
 from antlr3 import *
 from environment import *
 from CloudScriptLexer import CloudScriptLexer
@@ -37,6 +38,9 @@ if __name__ == '__main__':
             debug = False
         if opt in ('--param'):
             params = eval(base64.b64decode(arg))
+            for key in params.iterkeys():
+                params[key] = unicode(params[key][0], 'utf-8')
+	    environment.bindings['HTTP'] = params
             
     if debug:
         logging.basicConfig(level=logging.DEBUG)
