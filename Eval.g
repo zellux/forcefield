@@ -22,10 +22,13 @@ stmt : ^('=' ID expr)
         {set($ID.text, $expr.value);}
     | ^('RETURN' expr)
         {ret($expr.value);}
+    | 'IF' expr (stmt) 'ELSE' (stmt)
+        {}
     ;
 
 expr returns [value]
-    : ^('+' a=expr b=expr) {$value = add(a, b);}
+    : ^('--' a=expr b=expr) {$value = a == b;}
+    | ^('+' a=expr b=expr) {$value = add(a, b);}
     | ^('-' a=expr b=expr) {$value = a - b;}
     | ^('*' a=expr b=expr) {$value = a * b;}
     | ID {$value = lookup($ID.text);}
