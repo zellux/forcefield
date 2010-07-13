@@ -13,7 +13,7 @@ class ReturnValue(Exception):
 
     def getValue(self):
         return self.value
-        
+
 def lookup(key):
     if bindings.has_key(key):
         object = bindings[key]
@@ -34,8 +34,8 @@ def add(op1, op2):
         return op1 + unicode(op2)
     else:
         logging.warning('Unknown type ' + str(type(op1)))
-        
+
 def ret(value):
     logging.debug('Returning ' + unicode(value))
     raise ReturnValue(value)
-    
+

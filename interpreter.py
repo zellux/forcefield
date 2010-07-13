@@ -1,4 +1,4 @@
-#!/usr/bin/bash
+#!/usr/bin/python
 
 """
 Interprete the given file
@@ -37,7 +37,7 @@ def parse():
 
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "", ["help", "nodebug", "param="])
-    
+
     debug = True
     for opt, arg in opts:
         if opt in ('--nodebug'):
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             for key in params.iterkeys():
                 params[key] = unicode(params[key][0], 'utf-8')
 	    environment.bindings['HTTP'] = params
-            
+
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:

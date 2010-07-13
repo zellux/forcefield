@@ -27,7 +27,7 @@ class MainHandler(tornado.web.RequestHandler):
         p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE)
         output = p.stdout.read()
         self.write(output)
-        
+
 application = tornado.web.Application([
     (r"/(.*)", MainHandler),
 ])

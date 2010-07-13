@@ -6,6 +6,10 @@ options {
     ASTLabelType=CommonTree;
 }
 
+tokens {
+    NOP; EXPR; BLOCK;
+}
+
 @header {
 import logging
 
@@ -17,6 +21,10 @@ import logging
 
 prog
     : ( stmt {if $stmt.tree: logging.debug($stmt.tree.toStringTree());} )+;
+
+stmts
+    : (stmt {if $stmt.tree: logging.debug($stmt.tree.toStringTree());} )*
+    ;
 
 stmt
     : set_stmt
@@ -34,7 +42,11 @@ return_stmt
     ;
 
 if_stmt
-    : 'IF'^ expr 'THEN'! (stmt)* ('ELSE' (stmt)*)? 'END'!
+options {
+    backtrack=true;
+}
+    : 'IF' expr 'THEN' true_stmts=stmts 'ELSE' false_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK $false_stmts))
+    | 'IF' expr 'THEN' true_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK NOP))
     ;
 
 atom
