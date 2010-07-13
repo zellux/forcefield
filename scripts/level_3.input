@@ -1,0 +1,9 @@
+SET sex = HTTP["sex"]
+SET name = HTTP["name"]
+IF sex == "male" THEN
+  SET a = "STR"
+  RETURN "Hello, Mr. " + name
+ELSE
+  SET b = "YES"
+  RETURN "Hello, Miss. " + name
+END
