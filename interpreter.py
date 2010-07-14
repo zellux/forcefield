@@ -16,6 +16,7 @@ import antlr3.tree
 from environment import *
 from ExprLexer import ExprLexer
 from ExprParser import ExprParser
+from antlr3 import RecognitionException
 import Eval
 
 def parse():

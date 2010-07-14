@@ -39,3 +39,22 @@ def ret(value):
     logging.debug('Returning ' + unicode(value))
     raise ReturnValue(value)
 
+class Scope:
+    def __init__(self, action=None):
+        self.action = action
+
+    def eval(self):
+        if not self.action:
+            logging.warning('scope has no assigned action')
+        else:
+            self.action()
+
+class Expr:
+    def __init__(self, action=None):
+        self.action = action
+
+    def eval(self):
+        if not self.action:
+            logging.warning('expression has no assigned action')
+        else:
+            return self.action()
