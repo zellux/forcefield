@@ -7,7 +7,7 @@ options {
 }
 
 tokens {
-    NOP; EXPR; BLOCK;
+    NOP; EXPR; BLOCK; TRUE;
 }
 
 @header {
@@ -30,11 +30,17 @@ stmt
     : set_stmt
     | return_stmt
     | if_stmt
+    | for_stmt
+    | while_stmt
     | NEWLINE ->
     ;
 
 set_stmt
+options {
+    backtrack=true;
+}
     : 'SET' ID '=' expr NEWLINE -> ^('=' ID expr)
+    | 'SET' ID '=' expr -> ^('=' ID expr)
     ;
 
 return_stmt
@@ -47,6 +53,18 @@ options {
 }
     : 'IF' expr 'THEN' true_stmts=stmts 'ELSE' false_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK $false_stmts))
     | 'IF' expr 'THEN' true_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK NOP))
+    ;
+
+while_stmt
+    : WHILE test_expr=expr 'DO' stmts 'END' -> ^(WHILE ^(EXPR $test_expr) ^(BLOCK stmts))
+    ;
+
+for_stmt
+options {
+    backtrack=true;
+}
+    : 'FOR' init_stmt=stmt? ';' test_expr=expr ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR $test_expr?) ^(BLOCK stmts $post_stmt?)))
+    | 'FOR' init_stmt=stmt? ';' WHITESPACE* ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post_stmt?)))
     ;
 
 atom
@@ -84,6 +102,8 @@ expr
 /*------------------------------------------------------------------
  * LEXER RULES
  *------------------------------------------------------------------*/
+
+WHILE : 'WHILE';
 
 NUMBER : INTEGER;
 fragment INTEGER: '0' | '1'..'9' '0'..'9'*;

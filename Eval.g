@@ -16,9 +16,10 @@ from ExprLexer import ExprLexer
 
 }
 
-prog : (x=stmt {if x: x.eval()}) + ;
+prog
+    : (x=stmt {if x: x.eval()}) + ;
 
-stmts returns [scope]
+code_block returns [scope]
 @init {
     l = []
 }
@@ -33,19 +34,27 @@ stmts returns [scope]
 stmt returns [scope]
     : ^('=' ID expr) {
             $scope = Scope(lambda: set($ID.text, $expr.value.eval()))}
+    | code_block { $scope = $code_block.scope }
+    | NOP { $scope = Expr(lambda: None) }
     | ^('RETURN' expr) {
             $scope = Scope(lambda: ret($expr.value.eval()))}
-    | ^('IF' ^(EXPR v=expr) t=stmts f=stmts) {
+    | ^('IF' ^(EXPR v=expr) t=code_block f=code_block) {
             def action():
                 if v.eval():
                     t.eval()
                 else:
                     f.eval()
             $scope = Scope(action)}
+    | ^(WHILE ^(EXPR test=expr?) body=code_block) {
+            def action():
+                while test.eval():
+                    body.eval()
+            $scope = Scope(action)}
     ;
 
 expr returns [value]
     : ^('==' a=expr b=expr) {$value = Expr(lambda: a.eval() == b.eval())}
+    | ^('<' a=expr b=expr) { $value = Expr(lambda: a.eval() < b.eval()) }
     | ^('+' a=expr b=expr) {$value = Expr(lambda: add(a.eval(), b.eval()))}
     | ^('-' a=expr b=expr) {$value = Expr(lambda: a.eval() - b.eval())}
     | ^('*' a=expr b=expr) {$value = Expr(lambda: a.eval() * b.eval())}
@@ -53,5 +62,6 @@ expr returns [value]
     | ^(ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
     | STRING_LITERAL {$value = Expr(lambda: $STRING_LITERAL.text)}
     | NUMBER {$value = Expr(lambda: int($NUMBER.text))}
+    | TRUE { $value = Expr(lambda: True)}
     ;
 

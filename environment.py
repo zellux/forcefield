@@ -9,7 +9,10 @@ bindings = {}
 
 class ReturnValue(Exception):
     def __init__(self, value):
-        self.value = value.encode('utf-8')
+        if type(value) == type(''):
+            self.value = value.encode('utf-8')
+        else:
+            self.value = unicode(value).encode('utf-8')
 
     def getValue(self):
         return self.value
