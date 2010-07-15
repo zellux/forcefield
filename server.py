@@ -28,7 +28,22 @@ class MainHandler(tornado.web.RequestHandler):
         output = p.stdout.read()
         self.write(output)
 
+class LogHandler(tornado.web.RequestHandler):
+    def get(self, url):
+        request = self.request
+        if request.path == '/logs':
+            try:
+                f = open("logs.txt")
+                for line in f.readlines():
+                    self.write(line)
+                    self.write("<br />")
+                f.close()
+            except:
+                self.write('')
+                pass
+
 application = tornado.web.Application([
+    (r"/(logs)", LogHandler),
     (r"/(.*)", MainHandler),
 ])
 

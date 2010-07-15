@@ -50,6 +50,22 @@ stmt returns [scope]
                 while test.eval():
                     body.eval()
             $scope = Scope(action)}
+    | call { $scope = Scope(lambda: $call.value.eval()) }
+    ;
+
+call returns [value]
+@init {
+    l = []
+}
+    : ^(CALL ID ^(PARAMLIST (e=expr { l.append(e) })*)) {
+        def callfunc():
+            defun = lookup($ID.text)
+            if type(defun) != type(Defun()):
+                logging.debug("Function " + $ID.text + " was not defined")
+                return None
+            else:
+                return defun.call(map(lambda x: x.eval(), l))
+        $value = Expr(callfunc)}
     ;
 
 expr returns [value]
@@ -60,6 +76,7 @@ expr returns [value]
     | ^('*' a=expr b=expr) {$value = Expr(lambda: a.eval() * b.eval())}
     | ID {$value = Expr(lambda: lookup($ID.text))}
     | ^(ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
+    | call { $value = $call.value }
     | STRING_LITERAL {$value = Expr(lambda: $STRING_LITERAL.text)}
     | NUMBER {$value = Expr(lambda: int($NUMBER.text))}
     | TRUE { $value = Expr(lambda: True)}

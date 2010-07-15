@@ -4,6 +4,7 @@
 Maintain environment information
 """
 import logging
+from datetime import datetime
 
 bindings = {}
 
@@ -61,3 +62,32 @@ class Expr:
             logging.warning('expression has no assigned action')
         else:
             return self.action()
+
+class Defun:
+    '''方法定义'''
+    def __init__(self, action=None, paramdef=[]):
+        self.action = action
+        self.paramdef = paramdef
+
+    def call(self, values = []):
+        paramvalues = zip(self.paramdef, values)
+        if len(paramvalues) != len(self.paramdef):
+            logging.warning('Not enough parameters!')
+        for (k, v) in paramvalues:
+            set(k, v)
+        if not self.action:
+            logging.warning('Function has no assigned action')
+        else:
+            return self.action()
+
+    def eval(self):
+        return None
+
+def fun_WRITE_LOG():
+    f = open("logs.txt", "a")
+    with f:
+        f.write(lookup('SYSTEM_LOG'))
+        f.write('\n')
+
+bindings['SERVER_TIME'] = Defun(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+bindings['WRITE_LOG'] = Defun(fun_WRITE_LOG, ['SYSTEM_LOG'])

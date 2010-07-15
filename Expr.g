@@ -7,7 +7,7 @@ options {
 }
 
 tokens {
-    NOP; EXPR; BLOCK; TRUE;
+    NOP; EXPR; BLOCK; TRUE; CALL; PARAMLIST;
 }
 
 @header {
@@ -32,6 +32,7 @@ stmt
     | if_stmt
     | for_stmt
     | while_stmt
+    | call_stmt
     | NEWLINE ->
     ;
 
@@ -67,10 +68,19 @@ options {
     | 'FOR' init_stmt=stmt? ';' WHITESPACE* ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post_stmt?)))
     ;
 
+param_list
+    : (expr (',' expr)*)? -> ^(PARAMLIST expr*)
+    ;
+
+call_stmt
+    : ID '(' param_list ')' -> ^(CALL ID param_list)
+    ;
+
 atom
     : NUMBER
     | ID
     | ID '[' expr ']' -> ^(ID expr)
+    | call_stmt
     | STRING_LITERAL
     | '('! expr ')'!
     ;

@@ -501,7 +501,7 @@ class RequestHandler(object):
                 self._locale = self.get_browser_locale()
                 assert self._locale
         return self._locale
-            
+
     def get_user_locale(self):
         """Override to determine the locale from the authenticated user.
 
@@ -684,7 +684,7 @@ class RequestHandler(object):
                self.application.settings.get("xsrf_cookies"):
                 self.check_xsrf_cookie()
             self.prepare()
-            if not self._finished:  
+            if not self._finished:
                 getattr(self, self.request.method.lower())(*args, **kwargs)
                 if self._auto_finish and not self._finished:
                     self.finish()
@@ -950,7 +950,7 @@ class Application(object):
         handler = None
         args = []
         handlers = self._get_host_handlers(request)
-        if not handlers: 
+        if not handlers:
             handler = RedirectHandler(
                 request, "http://" + self.default_host + "/")
         else:
@@ -1012,7 +1012,7 @@ class RedirectHandler(RequestHandler):
         RequestHandler.__init__(self, application, request)
         self._url = url
         self._permanent = permanent
-        
+
     def get(self):
         self.redirect(self._url, permanent=self._permanent)
 
@@ -1130,7 +1130,7 @@ class ChunkedTransferEncoding(OutputTransform):
             else:
                 headers["Transfer-Encoding"] = "chunked"
         return headers
-        
+
     def transform_chunk(self, block):
         if self._chunking:
             return ("%x" % len(block)) + "\r\n" + block + "\r\n"
