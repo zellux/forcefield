@@ -1,0 +1,8 @@
+SET b = 0
+FOR SET i = 0;; SET i=i+1 DO
+    SET b = b + 2
+    IF i == 5 THEN
+        RETURN b
+    END
+END
+RETURN b
