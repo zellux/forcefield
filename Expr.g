@@ -33,6 +33,7 @@ stmt
     | for_stmt
     | while_stmt
     | call_stmt
+    | assert_stmt
     | NEWLINE ->
     ;
 
@@ -68,6 +69,10 @@ options {
     | 'FOR' init_stmt=stmt? ';' WHITESPACE* ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post_stmt?)))
     ;
 
+assert_stmt
+    : 'ASSERT' expr -> ^('ASSERT' expr)
+    ;
+        
 param_list
     : (expr (',' expr)*)? -> ^(PARAMLIST expr*)
     ;

@@ -1,0 +1,13 @@
+SET x = "["
+SET i = 0
+
+WHILE i < 10 DO
+  SET x = x + i
+  SET i = i + 1
+END
+
+SET x = x + "]"
+
+ASSERT x == "[0123456789]"
+
+RETURN x

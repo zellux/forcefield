@@ -10,6 +10,7 @@ options {
 import sys
 import traceback
 import logging
+import pdb
 
 from environment import *
 from ExprLexer import ExprLexer
@@ -50,6 +51,13 @@ stmt returns [scope]
                 while test.eval():
                     body.eval()
             $scope = Scope(action)}
+    | ^('ASSERT' v=expr) {
+            def action():
+                if not v.eval():
+                    logging.error("Assert failed!")
+                    sys.exit(-1)
+
+            $scope = Scope(action)}
     | call { $scope = Scope(lambda: $call.value.eval()) }
     ;
 
@@ -69,11 +77,11 @@ call returns [value]
     ;
 
 expr returns [value]
-    : ^('==' a=expr b=expr) {$value = Expr(lambda: a.eval() == b.eval())}
+    : ^('==' a=expr b=expr) { $value = Expr(lambda: a.eval() == b.eval()) }
     | ^('<' a=expr b=expr) { $value = Expr(lambda: a.eval() < b.eval()) }
-    | ^('+' a=expr b=expr) {$value = Expr(lambda: add(a.eval(), b.eval()))}
-    | ^('-' a=expr b=expr) {$value = Expr(lambda: a.eval() - b.eval())}
-    | ^('*' a=expr b=expr) {$value = Expr(lambda: a.eval() * b.eval())}
+    | ^('+' a=expr b=expr) { $value = Expr(lambda: add(a.eval(), b.eval())) }
+    | ^('-' a=expr b=expr) { $value = Expr(lambda: a.eval() - b.eval()) }
+    | ^('*' a=expr b=expr) { $value = Expr(lambda: a.eval() * b.eval()) }
     | ID {$value = Expr(lambda: lookup($ID.text))}
     | ^(ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
     | call { $value = $call.value }

@@ -6,8 +6,6 @@ Maintain environment information
 import logging
 from datetime import datetime
 
-bindings = {}
-
 class ReturnValue(Exception):
     def __init__(self, value):
         if type(value) == type(''):
@@ -18,40 +16,23 @@ class ReturnValue(Exception):
     def getValue(self):
         return self.value
 
-def lookup(key):
-    if bindings.has_key(key):
-        object = bindings[key]
-        return object
-    else:
-        logging.error('Cannot find ' + key + ' in context')
-        return None
-
-def set(key, value):
-    logging.debug('Set ' + key + ' to ' + repr(value))
-    bindings[key] = value
-
-def add(op1, op2):
-    logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
-    if isinstance(op1, int):
-        return op1 + op2
-    elif isinstance(op1, str) or isinstance(op1, unicode):
-        return op1 + unicode(op2)
-    else:
-        logging.warning('Unknown type ' + str(type(op1)))
-
-def ret(value):
-    logging.debug('Returning ' + unicode(value))
-    raise ReturnValue(value)
-
 class Scope:
-    def __init__(self, action=None):
+    def __init__(self, action=None, newenv=False):
         self.action = action
-
+        self.newenv = newenv
     def eval(self):
+        global current_bindings
+        prev = current_bindings
+        # Create a new environment if newenv is True
+        if self.newenv:
+            current_bindings = Binding(current_bindings)
+
         if not self.action:
             logging.warning('scope has no assigned action')
         else:
             self.action()
+
+        current_bindings = prev
 
 class Expr:
     def __init__(self, action=None):
@@ -83,11 +64,57 @@ class Defun:
     def eval(self):
         return None
 
+class Binding(dict):
+    def __init__(self, outer=None):
+        dict.__init__(self)
+        self.outer = outer
+        
 def fun_WRITE_LOG():
     f = open("logs.txt", "a")
     with f:
         f.write(lookup('SYSTEM_LOG'))
         f.write('\n')
 
-bindings['SERVER_TIME'] = Defun(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-bindings['WRITE_LOG'] = Defun(fun_WRITE_LOG, ['SYSTEM_LOG'])
+global_bindings = Binding()
+current_bindings = global_bindings
+
+global_bindings['SERVER_TIME'] = Defun(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+global_bindings['WRITE_LOG'] = Defun(fun_WRITE_LOG, ['SYSTEM_LOG'])
+
+def lookup(key, binding=current_bindings):
+    if binding.has_key(key):
+        object = binding[key]
+        return object
+    else:
+        if binding.outer != None:
+            return lookup(key, binding)
+        logging.error('Cannot find ' + key + ' in context')
+        return None
+    
+def set(key, value, binding=current_bindings):
+    b = binding
+    logging.debug('Set ' + key + ' to ' + repr(value))
+    # Lookup key from inner scope to outer scope
+    while True:
+        if b.has_key(key):
+            b[key] = value
+            return True
+        b = b.outer
+        if b == None: break
+        
+    binding.__setitem__(key, value)
+    return False
+
+def add(op1, op2):
+    logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
+    if isinstance(op1, int):
+        return op1 + op2
+    elif isinstance(op1, str) or isinstance(op1, unicode):
+        return op1 + unicode(op2)
+    else:
+        logging.warning('Unknown type ' + str(type(op1)))
+
+def ret(value):
+    logging.debug('Returning ' + unicode(value))
+    raise ReturnValue(value)
+
