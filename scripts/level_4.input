@@ -1,0 +1,4 @@
+SET name = HTTP["name"]
+SET time = SERVER_TIME()
+WRITE_LOG(name + " login on " + time)
+RETURN "OK"
