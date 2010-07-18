@@ -59,16 +59,29 @@ stmt returns [scope]
 
             $scope = Scope(action)}
     | call { $scope = Scope(lambda: $call.value.eval()) }
+    | func_stmt {$scope = $func_stmt.scope}
+    ;
+
+func_stmt returns [scope]
+@init {
+    l = []
+}
+    : ^('FUNC' fname=ID ^(PARAMLIST (ID { l.append(id) })*) body=code_block) {
+            def action():
+                body.eval()
+            f = Function(action)
+            return Scope(lambda: set(fname.text, f))
+        }
     ;
 
 call returns [value]
 @init {
     l = []
 }
-    : ^(CALL ID ^(PARAMLIST (e=expr { l.append(e) })*)) {
+    : ^(CALL ID ^(ARGLIST (e=expr { l.append(e) })*)) {
         def callfunc():
             defun = lookup($ID.text)
-            if type(defun) != type(Defun()):
+            if not isinstance(defun, Function):
                 logging.debug("Function " + $ID.text + " was not defined")
                 return None
             else:

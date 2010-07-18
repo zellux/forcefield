@@ -7,7 +7,7 @@ options {
 }
 
 tokens {
-    NOP; EXPR; BLOCK; TRUE; CALL; PARAMLIST;
+    NOP; EXPR; BLOCK; TRUE; CALL; PARAMLIST; ARGLIST;
 }
 
 @header {
@@ -33,6 +33,7 @@ stmt
     | for_stmt
     | while_stmt
     | call_stmt
+    | func_stmt
     | assert_stmt
     | NEWLINE ->
     ;
@@ -53,8 +54,10 @@ if_stmt
 options {
     backtrack=true;
 }
-    : 'IF' expr 'THEN' true_stmts=stmts 'ELSE' false_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK $false_stmts))
-    | 'IF' expr 'THEN' true_stmts=stmts 'END' -> ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK NOP))
+    : 'IF' expr 'THEN' true_stmts=stmts 'ELSE' false_stmts=stmts 'END' ->
+        ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK $false_stmts))
+    | 'IF' expr 'THEN' true_stmts=stmts 'END' ->
+        ^('IF' ^(EXPR expr) ^(BLOCK $true_stmts) ^(BLOCK NOP))
     ;
 
 while_stmt
@@ -65,29 +68,44 @@ for_stmt
 options {
     backtrack=true;
 }
-    : 'FOR' init_stmt=stmt? ';' test_expr=expr ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR $test_expr?) ^(BLOCK stmts $post_stmt?)))
-    | 'FOR' init_stmt=stmt? ';' WHITESPACE* ';' post_stmt=stmt? 'DO' stmts 'END' -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post_stmt?)))
+    : 'FOR' init_stmt=stmt? ';' test_expr=expr ';' post_stmt=stmt? 'DO' stmts 'END'
+        -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR $test_expr?) ^(BLOCK stmts $post_stmt?)))
+    | 'FOR' init_stmt=stmt? ';' WHITESPACE* ';' post_stmt=stmt? 'DO' stmts 'END'
+        -> ^(BLOCK $init_stmt? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post_stmt?)))
     ;
 
 assert_stmt
     : 'ASSERT' expr -> ^('ASSERT' expr)
     ;
-        
+
+func_stmt
+    : 'FUNC' ID '(' param_list ')' stmts 'END' -> ^('FUNC' ID param_list ^(BLOCK stmts))
+    ;
+
 param_list
-    : (expr (',' expr)*)? -> ^(PARAMLIST expr*)
+    : (ID (',' ID)*)? -> ^(PARAMLIST ID*)
+    ;
+
+
+arg_list
+    : (expr (',' expr)*)? -> ^(ARGLIST expr*)
     ;
 
 call_stmt
-    : ID '(' param_list ')' -> ^(CALL ID param_list)
+    : callExpr
     ;
 
 atom
     : NUMBER
     | ID
+    | callExpr
     | ID '[' expr ']' -> ^(ID expr)
-    | call_stmt
     | STRING_LITERAL
     | '('! expr ')'!
+    ;
+
+callExpr
+    : ID '(' arg_list ')' -> ^(CALL ID arg_list)
     ;
 
 boolNeg

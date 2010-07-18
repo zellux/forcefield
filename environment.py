@@ -8,31 +8,20 @@ from datetime import datetime
 
 class ReturnValue(Exception):
     def __init__(self, value):
-        if type(value) == type(''):
-            self.value = value.encode('utf-8')
-        else:
-            self.value = unicode(value).encode('utf-8')
+        self.value = value
 
     def getValue(self):
         return self.value
 
 class Scope:
-    def __init__(self, action=None, newenv=False):
+    def __init__(self, action=None):
         self.action = action
-        self.newenv = newenv
+        
     def eval(self):
-        global current_bindings
-        prev = current_bindings
-        # Create a new environment if newenv is True
-        if self.newenv:
-            current_bindings = Binding(current_bindings)
-
         if not self.action:
             logging.warning('scope has no assigned action')
         else:
             self.action()
-
-        current_bindings = prev
 
 class Expr:
     def __init__(self, action=None):
@@ -44,25 +33,34 @@ class Expr:
         else:
             return self.action()
 
-class Defun:
+class Function:
     '''方法定义'''
     def __init__(self, action=None, paramdef=[]):
         self.action = action
         self.paramdef = paramdef
 
     def call(self, values = []):
+        # Return value, i.e., function as expression
+
+        if not self.action:
+            logging.warning('Function has no assigned action')
+            return
+        
         paramvalues = zip(self.paramdef, values)
         if len(paramvalues) != len(self.paramdef):
             logging.warning('Not enough parameters!')
         for (k, v) in paramvalues:
             set(k, v)
-        if not self.action:
-            logging.warning('Function has no assigned action')
-        else:
-            return self.action()
-
-    def eval(self):
-        return None
+        
+        global current_bindings
+        prev = current_bindings
+        current_bindings = Binding(current_bindings)
+        try:
+            self.action()
+            current_bindings = prev
+        except ReturnValue as v:
+            current_bindings = prev
+            return v.getValue()
 
 class Binding(dict):
     def __init__(self, outer=None):
@@ -78,8 +76,8 @@ def fun_WRITE_LOG():
 global_bindings = Binding()
 current_bindings = global_bindings
 
-global_bindings['SERVER_TIME'] = Defun(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-global_bindings['WRITE_LOG'] = Defun(fun_WRITE_LOG, ['SYSTEM_LOG'])
+global_bindings['SERVER_TIME'] = Function(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+global_bindings['WRITE_LOG'] = Function(fun_WRITE_LOG, ['SYSTEM_LOG'])
 
 def lookup(key, binding=current_bindings):
     if binding.has_key(key):
@@ -110,7 +108,9 @@ def add(op1, op2):
     if isinstance(op1, int):
         return op1 + op2
     elif isinstance(op1, str) or isinstance(op1, unicode):
-        return op1 + unicode(op2)
+        print repr(op1)
+        print repr(op2)
+        return op1 + op2
     else:
         logging.warning('Unknown type ' + str(type(op1)))
 
