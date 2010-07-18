@@ -66,10 +66,10 @@ func_stmt returns [scope]
 @init {
     l = []
 }
-    : ^('FUNC' fname=ID ^(PARAMLIST (ID { l.append(id) })*) body=code_block) {
+    : ^('FUNC' fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*) body=code_block) {
             def action():
                 body.eval()
-            f = Function(action)
+            f = Function(action, l)
             return Scope(lambda: set(fname.text, f))
         }
     ;

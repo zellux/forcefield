@@ -34,8 +34,14 @@ class Expr:
             return self.action()
 
 class Function:
-    '''方法定义'''
+    '''Function object '''
     def __init__(self, action=None, paramdef=[]):
+        '''
+        Parameters:
+        action: function behaviour
+        paramdef: a list of function parameters, which will be used
+                  for dictionary keys when the function is called
+        '''
         self.action = action
         self.paramdef = paramdef
 
@@ -108,7 +114,7 @@ def add(op1, op2):
     if isinstance(op1, int):
         return op1 + op2
     elif isinstance(op1, str) or isinstance(op1, unicode):
-        return op1 + op2
+        return op1 + unicode(op2)
     else:
         logging.warning('Unknown type ' + str(type(op1)))
 

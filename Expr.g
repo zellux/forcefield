@@ -23,7 +23,7 @@ prog
     : ( stmt {if $stmt.tree: logging.debug($stmt.tree.toStringTree());} )+;
 
 stmts
-    : (stmt {if $stmt.tree: logging.debug($stmt.tree.toStringTree());} )*
+    : (stmt)*
     ;
 
 stmt
