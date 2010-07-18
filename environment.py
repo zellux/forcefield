@@ -108,8 +108,6 @@ def add(op1, op2):
     if isinstance(op1, int):
         return op1 + op2
     elif isinstance(op1, str) or isinstance(op1, unicode):
-        print repr(op1)
-        print repr(op2)
         return op1 + op2
     else:
         logging.warning('Unknown type ' + str(type(op1)))

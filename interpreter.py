@@ -32,7 +32,7 @@ def parse():
     try:
         walker.prog()
     except ReturnValue as v:
-        print v.getValue()
+        print v.getValue().encode('utf-8')
     except RecognitionException:
         traceback.print_stack()
 
@@ -47,7 +47,7 @@ if __name__ == '__main__':
             params = eval(base64.b64decode(arg))
             for key in params.iterkeys():
                 params[key] = unicode(params[key][0], 'utf-8')
-	    environment.bindings['HTTP'] = params
+	    environment.global_bindings['HTTP'] = params
 
     if debug:
         logging.basicConfig(level=logging.DEBUG)
