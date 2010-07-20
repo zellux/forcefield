@@ -91,6 +91,7 @@ call returns [value]
 
 expr returns [value]
     : ^('==' a=expr b=expr) { $value = Expr(lambda: a.eval() == b.eval()) }
+    | ^('<=' a=expr b=expr) { $value = Expr(lambda: a.eval() <= b.eval()) }
     | ^('<' a=expr b=expr) { $value = Expr(lambda: a.eval() < b.eval()) }
     | ^('+' a=expr b=expr) { $value = Expr(lambda: add(a.eval(), b.eval())) }
     | ^('-' a=expr b=expr) { $value = Expr(lambda: a.eval() - b.eval()) }

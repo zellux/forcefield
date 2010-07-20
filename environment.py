@@ -52,26 +52,41 @@ class Function:
             logging.warning('Function has no assigned action')
             return
         
+        global current_bindings
+        prev = current_bindings
+        current_bindings = Binding(current_bindings)
+        
         paramvalues = zip(self.paramdef, values)
         if len(paramvalues) != len(self.paramdef):
             logging.warning('Not enough parameters!')
         for (k, v) in paramvalues:
-            set(k, v)
+            set(k, v, bounded=True)
         
-        global current_bindings
-        prev = current_bindings
-        current_bindings = Binding(current_bindings)
+        # current_bindings.dump()
         try:
+            logging.debug('call')
             self.action()
             current_bindings = prev
         except ReturnValue as v:
             current_bindings = prev
+            logging.debug(repr(v.getValue()))
             return v.getValue()
 
 class Binding(dict):
     def __init__(self, outer=None):
         dict.__init__(self)
         self.outer = outer
+
+    def dump(self):
+        '''Debugging routine for dumping current bindings'''
+        indent = [''] # Hacking for "read-only" Python outer scope binding
+        def ptree(d):
+            if d.outer:
+                ptree(d.outer)
+            for k, v in d.iteritems():
+                print(indent[0] + k + ':' + unicode(v))
+            indent[0] += '  '
+        ptree(self)
         
 def fun_WRITE_LOG():
     f = open("logs.txt", "a")
@@ -82,22 +97,35 @@ def fun_WRITE_LOG():
 global_bindings = Binding()
 current_bindings = global_bindings
 
-global_bindings['SERVER_TIME'] = Function(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
-global_bindings['WRITE_LOG'] = Function(fun_WRITE_LOG, ['SYSTEM_LOG'])
+global_bindings[u'SERVER_TIME'] = Function(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+global_bindings[u'WRITE_LOG'] = Function(fun_WRITE_LOG, [u'SYSTEM_LOG'])
 
-def lookup(key, binding=current_bindings):
+def lookup(key, binding=None):
+    if not binding:
+        binding = current_bindings
+        
     if binding.has_key(key):
         object = binding[key]
         return object
     else:
         if binding.outer != None:
-            return lookup(key, binding)
+            return lookup(key, binding.outer)
         logging.error('Cannot find ' + key + ' in context')
         return None
     
-def set(key, value, binding=current_bindings):
+def set(key, value, binding=None, bounded=False):
+    '''Set _value_ to variable named _key_, within given _binding_.
+    When bounded is False, the method will search for outer scope when
+    _key_ is not found in current scope, otherwise it will simply
+    set current scope'''
+
+    if not binding:
+        binding = current_bindings
     b = binding
     logging.debug('Set ' + key + ' to ' + repr(value))
+    if bounded:
+        binding.__setitem__(key, value)
+        return
     # Lookup key from inner scope to outer scope
     while True:
         if b.has_key(key):
@@ -107,7 +135,6 @@ def set(key, value, binding=current_bindings):
         if b == None: break
         
     binding.__setitem__(key, value)
-    return False
 
 def add(op1, op2):
     logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
