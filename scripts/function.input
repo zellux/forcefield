@@ -1,0 +1,56 @@
+FUNC GETONE()
+  RETURN 1
+END
+
+FUNC INC_X()
+  SET a = x
+  SET x = x + 1
+END
+
+FUNC SHOW_X(prompt, tail)
+  RETURN prompt + x + tail
+END
+
+FUNC FIBONACCI(n)
+  IF n <= 0 THEN
+    RETURN 1
+  ELSE
+    IF n == 1 THEN
+      RETURN 1
+    ELSE
+      RETURN FIBONACCI(n-1) + FIBONACCI(n-2)
+    END
+  END
+END
+
+FUNC FACTORIAL(n)
+  IF n == 0 THEN
+    RETURN 1
+  ELSE
+    SET mid = FACTORIAL(n-1)
+    RETURN mid * n
+  END
+END
+
+FUNC CALL_GETONE()
+  RETURN GETONE()
+END
+
+SET x = GETONE()
+ASSERT(x == 1)
+
+INC_X()
+ASSERT(x == 2)
+
+SET text = SHOW_X("x的值为", "。")
+ASSERT(text == "x的值为2。")
+
+SET x = CALL_GETONE()
+ASSERT(x == 1)
+
+SET x = FACTORIAL(3)
+ASSERT(x == 6)
+
+SET x = FIBONACCI(10)
+ASSERT(x == 89)
+
