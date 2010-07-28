@@ -67,7 +67,7 @@ class Function:
             logging.debug('call')
             self.action()
             current_bindings = prev
-        except ReturnValue as v:
+        except ReturnValue, v:
             current_bindings = prev
             logging.debug(repr(v.getValue()))
             return v.getValue()
@@ -90,9 +90,9 @@ class Binding(dict):
         
 def fun_WRITE_LOG():
     f = open("logs.txt", "a")
-    with f:
-        f.write(lookup('SYSTEM_LOG'))
-        f.write('\n')
+    f.write(lookup('SYSTEM_LOG'))
+    f.write('\n')
+    f.close()
 
 global_bindings = Binding()
 current_bindings = global_bindings

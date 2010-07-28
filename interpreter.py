@@ -31,8 +31,11 @@ def parse():
 
     try:
         walker.prog()
-    except ReturnValue as v:
-        print v.getValue().encode('utf-8')
+    except ReturnValue, v:
+        if isinstance(v.getValue(), str) or isinstance(v.getValue(), unicode):
+            print v.getValue().encode('utf-8')
+        else:
+            print v.getValue()
     except RecognitionException:
         traceback.print_stack()
 
