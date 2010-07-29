@@ -72,6 +72,19 @@ class Function:
             logging.debug(repr(v.getValue()))
             return v.getValue()
 
+class RemoteCall:
+    def __init__(self, fname, paramdef=[]):
+        self.fname = fname
+        self.paramdef = paramdef
+        
+    def call(self, values = []):
+        paramvalues = zip(self.paramdef, values)
+        if len(paramvalues) != len(self.paramdef):
+            logging.warning('Not enough parameters!')
+        url = '&'.join(map(lambda (x, y): unicode(x) + '=' + unicode(y),
+                           paramvalues))
+        logging.debug(url)
+        
 class Binding(dict):
     def __init__(self, outer=None):
         dict.__init__(self)
@@ -90,14 +103,17 @@ class Binding(dict):
         
 def fun_WRITE_LOG():
     f = open("logs.txt", "a")
-    f.write(lookup('SYSTEM_LOG'))
+    f.write(lookup('SYSTEM_LOG').encode('utf-8'))
     f.write('\n')
     f.close()
 
 global_bindings = Binding()
 current_bindings = global_bindings
 
-global_bindings[u'SERVER_TIME'] = Function(lambda: datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+def get_time():
+    ret(datetime.now().strftime('%Y-%m-%d %H:%M:%S'))
+
+global_bindings[u'SERVER_TIME'] = Function(get_time)
 global_bindings[u'WRITE_LOG'] = Function(fun_WRITE_LOG, [u'SYSTEM_LOG'])
 
 def lookup(key, binding=None):
@@ -148,4 +164,13 @@ def add(op1, op2):
 def ret(value):
     logging.debug('Returning ' + unicode(value))
     raise ReturnValue(value)
+
+# Initialize server list
+server_list = {}
+
+f = open('server.conf', 'r')
+for line in f.readlines():
+    pair = map(str.strip, line.split(','))
+    if len(pair) < 2: continue
+    server_list[pair[0]] = pair[1]
 
