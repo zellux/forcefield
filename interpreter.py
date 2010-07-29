@@ -39,6 +39,17 @@ def parse():
     except RecognitionException:
         traceback.print_stack()
 
+def parseValue(value):
+    try:
+        x = int(value)
+        return x
+    except:
+        try:
+            x = float(value)
+            return x
+        except:
+            return unicode(value, 'utf-8')
+            
 if __name__ == '__main__':
     opts, args = getopt.getopt(sys.argv[1:], "", ["help", "nodebug", "param="])
 
@@ -49,7 +60,8 @@ if __name__ == '__main__':
         if opt in ('--param'):
             params = eval(base64.b64decode(arg))
             for key in params.iterkeys():
-                params[key] = unicode(params[key][0], 'utf-8')
+                value = parseValue(params[key][0])
+                params[key] = value
 	    environment.global_bindings['HTTP'] = params
 
     if debug:
