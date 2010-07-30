@@ -59,7 +59,18 @@ stmt returns [scope]
 
             $scope = Scope(action)}
     | call { $scope = Scope(lambda: $call.value.eval()) }
-    | func_stmt {$scope = $func_stmt.scope}
+    | remote_stmt { $scope = $remote_stmt.scope }
+    | func_stmt { $scope = $func_stmt.scope }
+    ;
+
+remote_stmt returns [scope]
+@init {
+    l = []
+}
+    : ^('REMOTE' sname=SID fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*)) {
+            f = RemoteCall(sname.text, fname.text, l)
+            return Scope(lambda: set(fname.text, f))
+        }
     ;
 
 func_stmt returns [scope]
@@ -81,8 +92,8 @@ call returns [value]
     : ^(CALL ID ^(ARGLIST (e=expr { l.append(e) })*)) {
         def callfunc():
             defun = lookup($ID.text)
-            if not isinstance(defun, Function):
-                logging.debug("Function " + $ID.text + " was not defined")
+            if not isinstance(defun, Function) and not isinstance(defun, RemoteCall):
+                logging.error("Function " + $ID.text + " was not defined")
                 return None
             else:
                 return defun.call(map(lambda x: x.eval(), l))

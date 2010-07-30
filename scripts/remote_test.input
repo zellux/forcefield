@@ -1,0 +1,29 @@
+FUNC GETONE()
+  RETURN 1
+END
+
+FUNC INC(x)
+  RETURN x + 1
+END
+
+REMOTE @script1 ADD_NUM(a, b)
+
+SET x = GETONE()
+SET y = INC(x)
+SET z = ADD_NUM(x, y)
+ASSERT z == 3
+
+FUNC FIBONACCI(n)
+  IF n <= 0 THEN
+    RETURN 1
+  ELSE
+    IF n == 1 THEN
+      RETURN 1
+    ELSE
+      RETURN ADD_NUM(FIBONACCI(n-1), FIBONACCI(n-2))
+    END
+  END
+END
+
+SET f = FIBONACCI(5)
+ASSERT f == 8

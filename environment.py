@@ -4,7 +4,20 @@
 Maintain environment information
 """
 import logging
+import urllib
 from datetime import datetime
+
+def parse_value(value):
+    try:
+        x = int(value)
+        return x
+    except:
+        try:
+            x = float(value)
+            return x
+        except:
+            return unicode(value, 'utf-8')
+            
 
 class ReturnValue(Exception):
     def __init__(self, value):
@@ -73,17 +86,35 @@ class Function:
             return v.getValue()
 
 class RemoteCall:
-    def __init__(self, fname, paramdef=[]):
+    def __init__(self, sname, fname, paramdef=[]):
+        '''
+        sname: script name
+        fname: remote function name
+        paramdef: parameter definitions'''
+        self.sname = sname
         self.fname = fname
         self.paramdef = paramdef
         
     def call(self, values = []):
-        paramvalues = zip(self.paramdef, values)
-        if len(paramvalues) != len(self.paramdef):
+        if not server_list.has_key(self.sname):
+            logging.error('No such server: %s!' % self.sname)
+            return None
+        if len(values) != len(self.paramdef):
             logging.warning('Not enough parameters!')
-        url = '&'.join(map(lambda (x, y): unicode(x) + '=' + unicode(y),
-                           paramvalues))
+
+        param = {}
+        for k, v in zip(self.paramdef, values):
+            param[k] = v
+            
+        url = server_list[self.sname]
+        if len(values) > 0 and not url.endswith('?'):
+            url += '?'
+        url += urllib.urlencode(param)
         logging.debug(url)
+        
+        retval = urllib.urlopen(url).read().strip()
+        retval = parse_value(retval)
+        return retval
         
 class Binding(dict):
     def __init__(self, outer=None):
@@ -172,5 +203,5 @@ f = open('server.conf', 'r')
 for line in f.readlines():
     pair = map(str.strip, line.split(','))
     if len(pair) < 2: continue
-    server_list[pair[0]] = pair[1]
+    server_list[unicode(pair[0])] = unicode(pair[1])
 

@@ -1,0 +1,7 @@
+FUNC ADD_NUM(a, b)
+  RETURN a + b
+END
+
+SET a = HTTP["a"]
+SET b = HTTP["b"]
+RETURN ADD_NUM(a, b)

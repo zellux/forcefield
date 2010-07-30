@@ -35,6 +35,7 @@ stmt
     | call_stmt
     | func_stmt
     | assert_stmt
+    | remote_stmt
     | NEWLINE ->
     ;
 
@@ -80,6 +81,10 @@ assert_stmt
 
 func_stmt
     : 'FUNC' ID '(' param_list ')' stmts 'END' -> ^('FUNC' ID param_list ^(BLOCK stmts))
+    ;
+
+remote_stmt
+    : 'REMOTE' SID ID '(' param_list ')' -> ^('REMOTE' SID ID param_list)
     ;
 
 param_list
@@ -153,3 +158,4 @@ NEWLINE : '\r'? '\n';
 fragment DIGIT : '0'..'9' ;
 
 ID: LETTER (LETTER | DIGIT | '_')*;
+SID: '@' ID {self.text = self.text[1:]};
