@@ -4,17 +4,21 @@ import os, sys
 from subprocess import *
 
 files = filter(lambda x: '_test' in x, os.listdir('scripts/'))
-cmd = 'cat scripts/%s | python interpreter.py'
+cmd = 'python interpreter.py'
 count = 0
 
 for fname in files:
-    status = call(cmd % fname, shell=True, stdout=PIPE, stderr=PIPE)
+    sys.stderr.write('Running test case %s...' % fname)
+    fin = open('scripts/' + fname, 'r')
+    p = Popen(['python', 'interpreter.py'], stdout=PIPE, stderr=None, stdin=fin)
+    sys.stderr.write('pid' + str(p.pid))
+    status = os.waitpid(p.pid, 0)[1]
     if status == 0:
-        print('Test case %s passed.' % fname)
+        sys.stderr.write('passed.\n')
         count += 1
     else:
-        print('Test case %s failed, error code=%d' % (fname, status))
+        sys.stderr.write('failed, error code=%d\n' % status)
 
-print
-print('-' * 40)
-print('%d/%d cases passed.' % (count, len(files)))
+sys.stderr.write('\n')
+sys.stderr.write('-' * 40 + '\n')
+sys.stderr.write('%d/%d cases passed.\n' % (count, len(files)))
