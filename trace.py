@@ -1,5 +1,10 @@
 #/usr/bin/python
 
+''' Debugging program given by stdin.
+stdout for debugging information
+stderr for program output
+'''
+
 import sys, logging, getopt, signal, os, time
 import base64
 import environment
@@ -24,7 +29,7 @@ def interative_hook():
     wakeup = False
     while not wakeup:
         time.sleep(5)
-    
+
 if __name__ == '__main__':
     Eval.tracehook = interative_hook
     signal.signal(signal.SIGUSR1, handler)
@@ -39,13 +44,12 @@ if __name__ == '__main__':
     walker = Eval.Eval(nodes)
 
     try:
-        for e in walker.prog():
-            print e
+        walker.prog():
     except ReturnValue, v:
         if isinstance(v.getValue(), str) or isinstance(v.getValue(), unicode):
-            print v.getValue().encode('utf-8')
+            sys.stderr.write(v.getValue().encode('utf-8'))
         else:
-            print v.getValue()
+            sys.stderr.write(v.getValue())
     except RecognitionException:
         traceback.print_stack()
 

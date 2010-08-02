@@ -26,8 +26,9 @@ class ReturnValue(Exception):
     def getValue(self):
         return self.value
 
-class Scope:
-    def __init__(self, action=None):
+class Stmt:
+    def __init__(self, action=None, lineno=-1):
+        self.lineno = lineno
         self.action = action
         
     def eval(self):

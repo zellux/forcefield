@@ -29,7 +29,7 @@ code_block returns [scope]
             def action():
                 for x in l:
                     x.eval()
-            return Scope(action)
+            return Stmt(action)
         }
     ;
 
@@ -39,31 +39,31 @@ stmt returns [scope]
         tracehook()
 }
     : ^('=' ID expr) {
-            $scope = Scope(lambda: set($ID.text, $expr.value.eval()))}
+            $scope = Stmt(lambda: set($ID.text, $expr.value.eval()), $ID.token.line) }
     | code_block { $scope = $code_block.scope }
     | NOP { $scope = Expr(lambda: None) }
-    | ^('RETURN' expr) {
-            $scope = Scope(lambda: ret($expr.value.eval()))}
-    | ^('IF' ^(EXPR v=expr) t=code_block f=code_block) {
+    | ^(RETURN expr) {
+            $scope = Stmt(lambda: ret($expr.value.eval()), $RETURN.token.line) }
+    | ^(IF ^(EXPR v=expr) t=code_block f=code_block) {
             def action():
                 if v.eval():
                     t.eval()
                 else:
                     f.eval()
-            $scope = Scope(action)}
+            $scope = Stmt(action, $IF.token.line) }
     | ^(WHILE ^(EXPR test=expr?) body=code_block) {
             def action():
                 while test.eval():
                     body.eval()
-            $scope = Scope(action)}
-    | ^('ASSERT' v=expr) {
+            $scope = Stmt(action, $WHILE.token.line)}
+    | ^(ASSERT v=expr) {
             def action():
                 if not v.eval():
                     logging.error("Assert failed!")
                     sys.exit(-1)
 
-            $scope = Scope(action)}
-    | call { $scope = Scope(lambda: $call.value.eval()) }
+            $scope = Stmt(action, $ASSERT.token.line)}
+    | call { $scope = Stmt(lambda: $call.value.eval(), $call.line) }
     | remote_stmt { $scope = $remote_stmt.scope }
     | func_stmt { $scope = $func_stmt.scope }
     ;
@@ -72,9 +72,9 @@ remote_stmt returns [scope]
 @init {
     l = []
 }
-    : ^('REMOTE' sname=SID fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*)) {
+    : ^(REMOTE sname=SID fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*)) {
             f = RemoteCall(sname.text, fname.text, l)
-            return Scope(lambda: set(fname.text, f))
+            return Stmt(lambda: set(fname.text, f), $REMOTE.token.line)
         }
     ;
 
@@ -82,15 +82,15 @@ func_stmt returns [scope]
 @init {
     l = []
 }
-    : ^('FUNC' fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*) body=code_block) {
+    : ^(FUNC fname=ID ^(PARAMLIST (id=ID { l.append(id.text) })*) body=code_block) {
             def action():
                 body.eval()
             f = Function(action, l)
-            return Scope(lambda: set(fname.text, f))
+            return Stmt(lambda: set(fname.text, f), $FUNC.token.line)
         }
     ;
 
-call returns [value]
+call returns [value, line]
 @init {
     l = []
 }
@@ -102,7 +102,8 @@ call returns [value]
                 return None
             else:
                 return defun.call(map(lambda x: x.eval(), l))
-        $value = Expr(callfunc)}
+        $value = Expr(callfunc)
+        $line=$ID.token.line}
     ;
 
 expr returns [value]
