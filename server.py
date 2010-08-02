@@ -62,17 +62,16 @@ class LogHandler(tornado.web.RequestHandler):
 
 class AjaxHandler(tornado.web.RequestHandler):
     def get(self, url):
-        request = self.request
-        path = request.path
         logging.debug('Handling next request %s' % url)
         if not sessions.has_key(url):
             logging.error('Cannot find debug session %s' % url)
+            self.write('Not running')
             return
         p = sessions[url]
         p.send_signal(signal.SIGUSR1)
         count = 0
         terminated = False
-        self.write('stdout<br/>')
+        self.write('stdout\n')
         while True:
             line = p.stdout.readline()
             if len(line.strip()) == 0:
@@ -80,14 +79,14 @@ class AjaxHandler(tornado.web.RequestHandler):
                 if count > 10:
                     terminated = True
                     break
-            print line
-            self.write(cgi.escape(line) + '<br/>')
+                continue
+            self.write(line + '\n')
             if line.strip() == 'END':
                 break
             if line.strip() == 'TERMINATED':
                 terminated = True
                 break
-        self.write('stderr<br/>')
+        self.write('stderr\n')
         while True:
             line = p.stderr.readline()
             if len(line.strip()) == 0:
@@ -95,8 +94,9 @@ class AjaxHandler(tornado.web.RequestHandler):
                 if count > 10:
                     terminated = True
                     break
+                continue
             print line
-            self.write(cgi.escape(line) + '<br/>')
+            self.write(line + '\n')
             if line.strip() == 'END':
                 break
             if line.strip() == 'TERMINATED':
@@ -104,16 +104,19 @@ class AjaxHandler(tornado.web.RequestHandler):
                 break
         if terminated:
             sessions.pop(url)
+            self.write('??')
         
-    def post(self, url):
-        self.get(url)
+settings = {
+    "static_path": os.path.join(os.path.dirname(__file__), "static"),
+}
+
 
 application = tornado.web.Application([
     (r"/(logs)", LogHandler),
-    (r"/ajax/next_(.*)", AjaxHandler),
+    (r"/ajax/(.*)", AjaxHandler),
     (r"/debug/(.*)", DebugHandler),
-    (r"/(.*)", MainHandler),
-])
+    (r"/([a-z_0-9]*)", MainHandler),
+], **settings)
 
 if __name__ == "__main__":
     http_server = tornado.httpserver.HTTPServer(application)

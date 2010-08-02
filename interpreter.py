@@ -39,11 +39,6 @@ def parse():
         
     except RecognitionException:
         traceback.print_stack()
-    finally:
-        sys.stdout.write('TERMINATED\n')
-        sys.stdout.flush()
-        sys.stderr.write('TERMINATED\n')
-        sys.stderr.flush()
 
 debug = True
 

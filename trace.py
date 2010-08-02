@@ -42,3 +42,7 @@ if __name__ == '__main__':
     interpret()
     parse()
     
+    sys.stdout.write('TERMINATED\n')
+    sys.stdout.flush()
+    sys.stderr.write('TERMINATED\n')
+    sys.stderr.flush()
