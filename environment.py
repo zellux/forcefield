@@ -3,9 +3,12 @@
 """
 Maintain environment information
 """
-import logging
+import logging, sys
 import urllib
 from datetime import datetime
+
+lastlineno = -1
+tracehook = None
 
 def parse_value(value):
     try:
@@ -32,6 +35,9 @@ class Stmt:
         self.action = action
         
     def eval(self):
+        global lastlineno
+        lastlineno = self.lineno
+        if tracehook != None: tracehook()
         if not self.action:
             logging.warning('scope has no assigned action')
         else:
@@ -124,13 +130,13 @@ class Binding(dict):
 
     def dump(self):
         '''Debugging routine for dumping current bindings'''
-        indent = [''] # Hacking for "read-only" Python outer scope binding
+        indent = ['**'] # Hacking for "read-only" Python outer scope binding
         def ptree(d):
             if d.outer:
                 ptree(d.outer)
             for k, v in d.iteritems():
-                print(indent[0] + k + ':' + unicode(v))
-            indent[0] += '  '
+                sys.stderr.write((indent[0] + k + ':' + unicode(v) + '\n').encode('utf-8'))
+            indent[0] += '**'
         ptree(self)
         
 def fun_WRITE_LOG():

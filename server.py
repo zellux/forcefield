@@ -1,15 +1,17 @@
 #!/usr/bin/python
 
-import logging
+import logging, signal
 import tornado.httpserver
 import tornado.web
-import os, sys
+import os, sys, cgi
 import base64
 from urllib2 import urlparse
 from subprocess import Popen
 import subprocess
 
 logging.basicConfig(level=logging.DEBUG)
+
+sessions = {}
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self, url):
@@ -28,6 +30,22 @@ class MainHandler(tornado.web.RequestHandler):
         output = p.stdout.read()
         self.write(output)
 
+class DebugHandler(tornado.web.RequestHandler):
+    def get(self, url):
+        request = self.request
+        filename = 'scripts/' + url + '.input'
+        args = request.arguments
+        logging.debug('Debugging %s, %s' % (filename, str(args)))
+        if not os.path.exists(filename):
+            logging.warning('script does not exist!')
+            raise tornado.web.HTTPError(404)
+        script = open(filename, 'r')
+        decoded = base64.b64encode(repr(args))
+        cmd = 'python trace.py --param="%s"' % decoded
+        logging.debug(cmd)
+        p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sessions[url] = p
+
 class LogHandler(tornado.web.RequestHandler):
     def get(self, url):
         request = self.request
@@ -42,8 +60,58 @@ class LogHandler(tornado.web.RequestHandler):
                 self.write('')
                 pass
 
+class AjaxHandler(tornado.web.RequestHandler):
+    def get(self, url):
+        request = self.request
+        path = request.path
+        logging.debug('Handling next request %s' % url)
+        if not sessions.has_key(url):
+            logging.error('Cannot find debug session %s' % url)
+            return
+        p = sessions[url]
+        p.send_signal(signal.SIGUSR1)
+        count = 0
+        terminated = False
+        self.write('stdout<br/>')
+        while True:
+            line = p.stdout.readline()
+            if len(line.strip()) == 0:
+                count += 1
+                if count > 10:
+                    terminated = True
+                    break
+            print line
+            self.write(cgi.escape(line) + '<br/>')
+            if line.strip() == 'END':
+                break
+            if line.strip() == 'TERMINATED':
+                terminated = True
+                break
+        self.write('stderr<br/>')
+        while True:
+            line = p.stderr.readline()
+            if len(line.strip()) == 0:
+                count += 1
+                if count > 10:
+                    terminated = True
+                    break
+            print line
+            self.write(cgi.escape(line) + '<br/>')
+            if line.strip() == 'END':
+                break
+            if line.strip() == 'TERMINATED':
+                terminated = True
+                break
+        if terminated:
+            sessions.pop(url)
+        
+    def post(self, url):
+        self.get(url)
+
 application = tornado.web.Application([
     (r"/(logs)", LogHandler),
+    (r"/ajax/next_(.*)", AjaxHandler),
+    (r"/debug/(.*)", DebugHandler),
     (r"/(.*)", MainHandler),
 ])
 

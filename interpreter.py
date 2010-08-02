@@ -36,15 +36,23 @@ def parse():
             print v.getValue().encode('utf-8')
         else:
             print v.getValue()
+        
     except RecognitionException:
         traceback.print_stack()
+    finally:
+        sys.stdout.write('TERMINATED\n')
+        sys.stdout.flush()
+        sys.stderr.write('TERMINATED\n')
+        sys.stderr.flush()
 
-if __name__ == '__main__':
+debug = True
+
+def interpret():
     opts, args = getopt.getopt(sys.argv[1:], "", ["help", "nodebug", "param="])
 
-    debug = True
     for opt, arg in opts:
         if opt in ('--nodebug'):
+            global debug
             debug = False
         if opt in ('--param'):
             params = eval(base64.b64decode(arg))
@@ -53,6 +61,10 @@ if __name__ == '__main__':
                 params[key] = value
 	    environment.global_bindings['HTTP'] = params
 
+    
+if __name__ == '__main__':
+    interpret()
+    
     if debug:
         logging.basicConfig(level=logging.DEBUG)
     else:

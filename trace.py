@@ -1,8 +1,8 @@
-#/usr/bin/python
+#!/usr/bin/python
 
 ''' Debugging program given by stdin.
-stdout for debugging information
-stderr for program output
+stderr for debugging information
+stdout for program output
 '''
 
 import sys, logging, getopt, signal, os, time
@@ -10,12 +10,12 @@ import base64
 import environment
 import antlr3
 import antlr3.tree
-from environment import *
 from ExprLexer import ExprLexer
 from ExprParser import ExprParser
 from antlr3 import RecognitionException
 import Eval
 import traceback
+from interpreter import interpret, parse
 
 wakeup = True
 
@@ -24,32 +24,21 @@ def handler(signum, stack):
     wakeup = True
     
 def interative_hook():
-    current_bindings.dump()
+    environment.current_bindings.dump()
+    sys.stdout.write('END\n')
+    sys.stdout.flush()
+    sys.stderr.write('# ' + str(environment.lastlineno) + '\n')
+    sys.stderr.write('END\n')
+    sys.stderr.flush()
     global wakeup
     wakeup = False
     while not wakeup:
         time.sleep(5)
 
 if __name__ == '__main__':
-    Eval.tracehook = interative_hook
+    environment.tracehook = interative_hook
     signal.signal(signal.SIGUSR1, handler)
     
-    char_stream = antlr3.ANTLRInputStream(sys.stdin, encoding='utf-8')
-    lexer = ExprLexer(char_stream)
-    tokens = antlr3.CommonTokenStream(lexer)
-    parser = ExprParser(tokens)
-    r = parser.prog()
-    root = r.tree
-    nodes = antlr3.tree.CommonTreeNodeStream(root)
-    walker = Eval.Eval(nodes)
-
-    try:
-        walker.prog():
-    except ReturnValue, v:
-        if isinstance(v.getValue(), str) or isinstance(v.getValue(), unicode):
-            sys.stderr.write(v.getValue().encode('utf-8'))
-        else:
-            sys.stderr.write(v.getValue())
-    except RecognitionException:
-        traceback.print_stack()
-
+    interpret()
+    parse()
+    

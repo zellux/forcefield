@@ -15,7 +15,6 @@ import pdb
 from environment import *
 from ExprLexer import ExprLexer
 
-tracehook = None
 }
 
 prog
@@ -35,8 +34,6 @@ code_block returns [scope]
 
 stmt returns [scope]
 @init {
-    if tracehook != None:
-        tracehook()
 }
     : ^('=' ID expr) {
             $scope = Stmt(lambda: set($ID.text, $expr.value.eval()), $ID.token.line) }
