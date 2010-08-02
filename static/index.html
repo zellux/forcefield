@@ -1,56 +1,43 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
-<head>
-	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>Hello SyntaxHighlighter</title>
-	<script type="text/javascript" src="syntaxhighlighter/scripts/shCore.js"></script>
-	<script type="text/javascript" src="syntaxhighlighter/scripts/shBrushFF.js"></script>
-	<script type="text/javascript" src="jquery-1.4.2.min.js"></script>	
-	<link type="text/css" rel="stylesheet" href="syntaxhighlighter/styles/shCoreDefault.css"/>
-</head>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Hello SyntaxHighlighter</title>
+    <script type="text/javascript" src="syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="syntaxhighlighter/scripts/shBrushFF.js"></script>
+    <script type="text/javascript" src="jquery-1.4.2.min.js"></script>	
+    <link type="text/css" rel="stylesheet" href="syntaxhighlighter/styles/shCoreDefault.css"/>
+  </head>
 
-<body style="background: white; font-family: Helvetica">
+  <style>
+    #controlpanel {  
+    z-index:999;  
+    position:fixed;  
+    bottom:0;   /*去掉此行则固定在页面顶部*/  
+    left:0;  
+    width:100%;
+    padding:10px;
+    _position:absolute; /* for IE6 */  
+    _top: expression(documentElement.scrollTop + documentElement.clientHeight-this.offsetHeight); /* for IE6 */  
+    overflow:visible;  
+    }
 
-<script>
-  $(function () {
-  SyntaxHighlighter.all();
-  $("#nextbtn").click(function() {
-    $.ajax({
-      type: "GET",
-      // Use random to avoid browser Ajax bug
-      url: '/ajax/function_test?random=' + new Date().getTime(),
-      timeout: 1000,
-      success: function(data) {
-        lines = data.split('\n');
-        lineno = -1;
-        len = lines.length;
-        for (var i = 0; i < len; i++) {
-          if (lines[i].charAt(0) == '#') {
-            lineno = parseInt(lines[i].substr(1));
-//            alert(lineno);
-          }
-          if (lines[i].charAt(0) == '?' && lines[i].charAt(1) == '?') {
-            alert("Terminated");
-            return;
-          }
-        }
-        if (lineno > 0) {
-          $("div.highlighted").removeClass("highlighted");
-          $("div.number"+lineno).addClass("highlighted");
-        }
-      },
-      error: function(obj, error) {
-        alert("Ajax error " + error);
-      }
-    });
-  });
-  
-  });
-</script>
+    #nextbtn {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #f00;
+    }
+  </style>
 
-<a id="nextbtn" href="#">next</a>
-<h1>Hello SyntaxHighlighter</h1>
-<pre class="brush: ff">
+  <body style="background: white; font-family: Helvetica; margin: 0 auto; width: 1000px;">
+
+    <div style="border: 1px solid; width: 600px; float: right;">
+      <div id="controlpanel">
+	<a id="nextbtn" href="#">next</a>
+      </div>
+
+      <pre class="brush: ff">
 FUNC GETONE()
   RETURN 1
 END
@@ -107,7 +94,52 @@ ASSERT(x == 6)
 SET x = FIBONACCI(10)
 ASSERT(x == 89)
 
-</pre>
+	  </pre>
+      
+    </div>
+    
+    <script>
+  function stepinto() {
+    $.ajax({
+      type: "GET",
+      // Use random to avoid browser Ajax bug
+      url: '/ajax/function_test?random=' + new Date().getTime(),
+      timeout: 1000,
+      success: function(data) {
+        lines = data.split('\n');
+        lineno = -1;
+        len = lines.length;
+        for (var i = 0; i < len; i++) {
+          if (lines[i].charAt(0) == '#') {
+            lineno = parseInt(lines[i].substr(1));
+//            alert(lineno);
+          }
+          if (lines[i].charAt(0) == '?' && lines[i].charAt(1) == '?') {
+            alert("Terminated");
+            return;
+          }
+        }
+        if (lineno > 0) {
+          $("div.highlighted").removeClass("highlighted");
+          $("div.number"+lineno).addClass("highlighted");
+        }
+      },
+      error: function(obj, error) {
+        alert("Ajax error " + error);
+      }
+    });
+  }
+	
+  $(function () {
+    SyntaxHighlighter.all();
+    $("#nextbtn").click(function() {
+      stepinto();
+      return false;
+    });
+  });
+  </script>
+    </body>
 
+  
 </html>
 

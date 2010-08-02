@@ -37,7 +37,7 @@ class Stmt:
     def eval(self):
         global lastlineno
         lastlineno = self.lineno
-        if tracehook != None: tracehook()
+        if tracehook != None and self.lineno > 0: tracehook()
         if not self.action:
             logging.warning('scope has no assigned action')
         else:
