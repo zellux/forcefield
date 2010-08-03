@@ -135,7 +135,15 @@ class Binding(dict):
             if d.outer:
                 ptree(d.outer)
             for k, v in d.iteritems():
-                sys.stderr.write((indent[0] + k + ':' + unicode(v) + '\n').encode('utf-8'))
+                if isinstance(v, int) or isinstance(v, dict):
+                    value = unicode(v)
+                elif isinstance(v, Function):
+                    value = u'Function'
+                elif isinstance(v, RemoteCall):
+                    value = u'Remote call'
+                else:
+                    value = u'"' + unicode(v) + u'"'
+                sys.stderr.write((indent[0] + k + ':' + value + '\n').encode('utf-8'))
             indent[0] += '**'
         ptree(self)
         
