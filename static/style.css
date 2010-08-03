@@ -1,0 +1,33 @@
+#controlpanel {  
+    z-index:999;  
+    position:fixed;  
+    bottom:0;
+    left:0;  
+    width:100%;
+    padding:10px;
+    _position:absolute; /* for IE6 */  
+    _top: expression(documentElement.scrollTop + documentElement.clientHeight-this.offsetHeight); /* for IE6 */  
+    overflow:visible;
+    background-color: #EDF3FE;
+    border: 1px solid;
+    text-align: center;
+}
+
+#nextbtn {
+    font-size: 24px;
+    font-weight: bold;
+    text-decoration: none;
+    color: #f00;
+}
+
+#scopewrapper table {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
+#scopewrapper td {
+    border: 1px solid;
+    border-collapse: collapse;
+}
+
+

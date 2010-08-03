@@ -1,0 +1,34 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Hello SyntaxHighlighter</title>
+    <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shCore.js"></script>
+    <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushFF.js"></script>
+    <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>	
+    <script type="text/javascript" src="/static/debug.js?random={{ random }}"></script>	
+    <link type="text/css" rel="stylesheet" href="/static/syntaxhighlighter/styles/shCoreDefault.css"/>
+    <link type="text/css" rel="stylesheet" href="/static/style.css?random={{ random }}"/>
+  </head>
+
+  <body style="background: white; font-family: Helvetica; margin: 0 auto; width: 1000px;">
+
+    <div style="border-left: 1px dashed; width: 450px; float: right;">
+      <div id="controlpanel">
+	<a id="nextbtn" href="#">next</a>
+      </div>
+
+      <pre class="brush: ff" style="background-color: #3333ff;">{{ source }} </pre>
+    </div>
+
+    <div id="scopewrapper" style="width: 450px; float: left;">
+      <div id="scope">
+    </div>
+    
+    <script>
+    </script>
+  </body>
+
+  
+</html>
+
