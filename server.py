@@ -1,6 +1,6 @@
 #!/usr/bin/python
 
-import logging, signal
+import logging, signal, random
 import tornado.httpserver
 import tornado.web
 import os, sys, cgi
@@ -8,10 +8,12 @@ import base64
 from urllib2 import urlparse
 from subprocess import Popen
 import subprocess
+import mutex
 
 logging.basicConfig(level=logging.DEBUG)
 
 sessions = {}
+locks = {}
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self, url):
@@ -39,12 +41,15 @@ class DebugHandler(tornado.web.RequestHandler):
         if not os.path.exists(filename):
             logging.warning('script does not exist!')
             raise tornado.web.HTTPError(404)
-        script = open(filename, 'r')
-        decoded = base64.b64encode(repr(args))
-        cmd = 'python trace.py --param="%s"' % decoded
-        logging.debug(cmd)
-        p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sessions[url] = p
+        if not sessions.has_key(url):
+            script = open(filename, 'r')
+            decoded = base64.b64encode(repr(args))
+            cmd = 'python trace.py --param="%s"' % decoded
+            logging.debug(cmd)
+            p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            sessions[url] = p
+        src = open(filename, 'r').read()
+        self.render('template.html', source=src, random=random.randint(1, 100000))
 
 class LogHandler(tornado.web.RequestHandler):
     def get(self, url):
@@ -80,6 +85,7 @@ class AjaxHandler(tornado.web.RequestHandler):
                     terminated = True
                     break
                 continue
+            logging.debug(line)
             self.write(line + '\n')
             if line.strip() == 'END':
                 break
@@ -95,7 +101,7 @@ class AjaxHandler(tornado.web.RequestHandler):
                     terminated = True
                     break
                 continue
-            print line
+            logging.debug(line)
             self.write(line + '\n')
             if line.strip() == 'END':
                 break
