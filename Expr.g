@@ -58,12 +58,11 @@ set_stmt
 options {
     backtrack=true;
 }
-    : SET ID '=' expr NEWLINE -> ^('=' ID expr)
     | SET ID '=' expr -> ^('=' ID expr)
     ;
 
 return_stmt
-    : RETURN expr NEWLINE -> ^(RETURN expr)
+    : RETURN expr -> ^(RETURN expr)
     ;
 
 if_stmt
