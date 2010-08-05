@@ -135,7 +135,7 @@ class Binding(dict):
             if d.outer:
                 ptree(d.outer)
             for k, v in d.iteritems():
-                if isinstance(v, int) or isinstance(v, dict):
+                if isinstance(v, int) or isinstance(v, dict) or isinstance(v, float):
                     value = unicode(v)
                 elif isinstance(v, Function):
                     value = u'Function'
@@ -200,7 +200,7 @@ def set(key, value, binding=None, bounded=False):
 
 def add(op1, op2):
     logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
-    if isinstance(op1, int):
+    if isinstance(op1, int) or isinstance(op1, float):
         return op1 + op2
     elif isinstance(op1, str) or isinstance(op1, unicode):
         return op1 + unicode(op2)

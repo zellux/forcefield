@@ -19,6 +19,10 @@ tokens {
     DO = 'DO';
     FOR = 'FOR';
     REMOTE = 'REMOTE';
+    WHILE = 'WHILE';
+    AND = 'AND';
+    OR = 'OR';
+    NOT = 'NOT';
 }
 
 @header {
@@ -112,7 +116,8 @@ call_stmt
     ;
 
 atom
-    : NUMBER
+    : INTEGER
+    | FLOAT
     | ID
     | callExpr
     | ID '[' expr ']' -> ^(ID expr)
@@ -125,7 +130,7 @@ callExpr
     ;
 
 boolNeg
-    : ('not'^)? atom
+    : (NOT^)? atom
     ;
 
 signExpr
@@ -145,17 +150,15 @@ relExpr
     ;
 
 expr
-    : relExpr (('and'^|'or'^) relExpr)*
+    : relExpr ((AND^|OR^) relExpr)*
     ;
 
 /*------------------------------------------------------------------
  * LEXER RULES
  *------------------------------------------------------------------*/
 
-WHILE : 'WHILE';
-
-NUMBER : INTEGER;
-fragment INTEGER: '0' | '1'..'9' '0'..'9'*;
+INTEGER: ('0'..'9')+;
+FLOAT: INTEGER '.' INTEGER;
 
 fragment LETTER: LOWER | UPPER;
 fragment LOWER: 'a'..'z';

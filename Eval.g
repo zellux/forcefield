@@ -113,11 +113,15 @@ expr returns [value]
     | ^('+' a=expr b=expr) { $value = Expr(lambda: add(a.eval(), b.eval())) }
     | ^('-' a=expr b=expr) { $value = Expr(lambda: a.eval() - b.eval()) }
     | ^('*' a=expr b=expr) { $value = Expr(lambda: a.eval() * b.eval()) }
+    | ^(AND a=expr b=expr) { $value = Expr(lambda: a.eval() and b.eval()) }
+    | ^(OR a=expr b=expr) { $value = Expr(lambda: a.eval() or b.eval()) }
+    | ^(NOT a=expr) { $value = Expr(lambda: not a.eval()) }
     | ID {$value = Expr(lambda: lookup($ID.text))}
     | ^(ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
     | call { $value = $call.value }
-    | STRING_LITERAL {$value = Expr(lambda: $STRING_LITERAL.text)}
-    | NUMBER {$value = Expr(lambda: int($NUMBER.text))}
-    | TRUE { $value = Expr(lambda: True)}
+    | STRING_LITERAL { $value = Expr(lambda: $STRING_LITERAL.text) }
+    | INTEGER { $value = Expr(lambda: int($INTEGER.text)) }
+    | FLOAT { $value = Expr(lambda: float($FLOAT.text)) }
+    | TRUE { $value = Expr(lambda: True) }
     ;
 
