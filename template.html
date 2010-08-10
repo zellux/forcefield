@@ -11,25 +11,23 @@
     <link type="text/css" rel="stylesheet" href="/static/style.css?random={{ random }}"/>
   </head>
 
-  <body style="background: white; font-family: Helvetica; margin: 0 auto; width: 1000px;">
-
-    <div style="border-left: 1px dashed; width: 450px; float: right;">
-      <div id="controlpanel">
-	<a id="nextbtn" href="#">next</a>
-      </div>
-
+  <body>
+    <div id="body">
+    <div id="controlpanel">
+        <a id="nextbtn" href="#">next</a>
+    </div>
+    <div id="codearea">
       <pre class="brush: ff" style="background-color: #3333ff;">{{ source }} </pre>
-    </div>
+  </div>
 
-    <div id="scopewrapper" style="width: 450px; float: left;">
-      <div id="scope">
-    </div>
-    
-    <script>
+  <div id="scopewrapper">
+      <div id="scope"></div>
+  </div>
+  <script>
       fname = "{{ fname }}";
-    </script>
+  </script>
+  <div id="footer"></div>  
+  </div>
   </body>
-
-  
 </html>
 
