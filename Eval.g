@@ -63,14 +63,14 @@ stmt returns [scope]
             def action():
                 while test.eval():
                     body.eval()
-            $scope = Stmt(action, $WHILE.token.line)}
+            $scope = Stmt(action, $WHILE.token.line) }
     | ^(ASSERT v=expr) {
             def action():
                 if not v.eval():
                     logging.error("Assert failed!")
                     sys.exit(-1)
 
-            $scope = Stmt(action, $ASSERT.token.line)}
+            $scope = Stmt(action, $ASSERT.token.line) }
     | call { $scope = Stmt(lambda: $call.value.eval(), $call.line) }
     | remote_stmt { $scope = $remote_stmt.scope }
     | func_stmt { $scope = $func_stmt.scope }

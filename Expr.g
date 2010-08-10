@@ -23,6 +23,8 @@ tokens {
     AND = 'AND';
     OR = 'OR';
     NOT = 'NOT';
+    TO = 'TO';
+    STEP = 'STEP';
 }
 
 @header {
@@ -84,10 +86,10 @@ for_stmt
 options {
     backtrack=true;
 }
-    : FOR i=stmt? ';' test=expr ';' post=stmt? DO stmts END
-        -> ^(BLOCK $i? ^(WHILE ^(EXPR $test?) ^(BLOCK stmts $post?)))
-    | FOR i=stmt? ';' WHITESPACE* ';' post=stmt? DO stmts END
-        -> ^(BLOCK $i? ^(WHILE ^(EXPR TRUE) ^(BLOCK stmts $post?)))
+    : FOR i=expr '=' init=expr TO fin=expr STEP step=expr DO stmts END
+        -> ^(BLOCK ^('=' $i $init)
+            ^(WHILE ^(EXPR ^('<=' $i $fin))
+                ^(BLOCK stmts ^('=' $i ^('+' $i $step)))))
     ;
 
 assert_stmt
