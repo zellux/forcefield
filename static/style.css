@@ -1,3 +1,19 @@
+body {
+    background: #EEE;
+}
+#body {
+    background: white;
+    font-family: Helvetica;
+    margin: 0 auto;
+    width: 1000px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    border-radius: 20px;
+    box-shadow: 5px 5px 5px #ccc;
+    -moz-box-shadow: 5px 5px 5px #ccc;
+    -webkit-box-shadow: 5px 5px 5px #ccc;
+}
+
 #controlpanel {  
     z-index:999;  
     position:fixed;  
@@ -20,14 +36,58 @@
     color: #f00;
 }
 
+#scopewrapper {
+    width: 350px;
+    float: left;
+}
+
 #scopewrapper table {
-    border: 1px solid;
+    width: 100%;
     border-collapse: collapse;
+}
+
+#scopewrapper table th {
+    color: #FFF;
+    background: #3BA3D0;
+    padding-top: 0.5em;
+    border-top: 1px #FFF hidden;
+    -webkit-border-top-left-radius: 20px;
+    /*-webkit-border-top-right-radius: 20px;*/
+    -moz-border-radius-topleft: 20px;
+    /*-moz-border-radius-topright: 20px;*/
+    border-top-left-radius: 20px;
+    /*border-top-right-radius: 20px;*/
 }
 
 #scopewrapper td {
-    border: 1px solid;
-    border-collapse: collapse;
+    border: 1px solid #64AFCF;
 }
 
+#scopewrapper td.name {
+    width: 150px;
+    border-left: none;
+}
 
+#scopewrapper td.bindvalue {
+    width: 200px;
+    border-right: none;
+}
+
+#codearea {
+    border-left: 1px dashed;
+    width: 640px;
+    float: right;
+}
+
+div.syntaxhighlighter table {
+    padding: 1px 0 !important; /* fix chrome scroll bar */
+}
+
+.clear {
+    clear: both;
+}
+
+#footer {
+    height: 44px;
+    clear: both;
+}

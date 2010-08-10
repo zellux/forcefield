@@ -30,13 +30,13 @@ function stepinto() {
 	  str = str.replace('<', '&lt;');
 	  if (scopes[level] == null)
 	    scopes[level] = "";
-	  scopes[level] += "<tr><td>" + vname + "</td><td>" + str.substr(pos+1) + "</td></tr>";
+	  scopes[level] += "<tr><td class=\"name\">" + vname + "</td><td class=\"bindvalue\">" + str.substr(pos+1) + "</td></tr>";
 	}
       }
       var html = "<table style=\"text-align: center\">";
       for (var i = 0; i < scopes.length; i++) {
 	if (typeof(scopes[i]) == 'undefined') continue;
-	html += "<th colspan=\"2\" style=\"background-color: #ccc\">Level " + i + " binding(s)</th>";
+	html += "<th colspan=\"2\">Level " + i + " binding(s)</th>";
 	html += scopes[i];
       }
       html += "</table>";
@@ -45,6 +45,30 @@ function stepinto() {
         $("div.highlighted").removeClass("highlighted");
         $("div.number"+lineno).addClass("highlighted");
       }
+
+    $("#scopewrapper tr:has('th')").toggle(
+        function() {
+            var next = $(this);
+            while (next) {
+                next = next.next();
+                if ($("td", next).size() > 0) {
+                    next.hide();
+                }
+                else
+                    break;
+            }
+        },
+        function() {
+            var next = $(this);
+            while (next) {
+                next = next.next();
+                if ($("td", next).size() > 0) {
+                    next.show();
+                }
+                else
+                    break;
+            }
+        });
     },
     error: function(obj, error) {
       alert("Ajax error " + error);
