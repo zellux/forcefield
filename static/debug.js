@@ -45,6 +45,30 @@ function stepinto() {
         $("div.highlighted").removeClass("highlighted");
         $("div.number"+lineno).addClass("highlighted");
       }
+
+    $("#scopewrapper tr:has('th')").toggle(
+        function() {
+            var next = $(this);
+            while (next) {
+                next = next.next();
+                if ($("td", next).size() > 0) {
+                    next.hide();
+                }
+                else
+                    break;
+            }
+        },
+        function() {
+            var next = $(this);
+            while (next) {
+                next = next.next();
+                if ($("td", next).size() > 0) {
+                    next.show();
+                }
+                else
+                    break;
+            }
+        });
     },
     error: function(obj, error) {
       alert("Ajax error " + error);
