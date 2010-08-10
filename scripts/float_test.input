@@ -1,0 +1,13 @@
+FUNC FLOAT_EQ(a, b)
+  RETURN (a-b>=0 AND a-b<0.000001) OR (b-a>=0 AND b-a<0.000001)
+END
+
+SET a = 1.5
+SET b = 2.5
+SET c = 1
+
+ASSERT FLOAT_EQ(a+b, 4)
+ASSERT FLOAT_EQ(a+c, 2.5)
+ASSERT FLOAT_EQ(c+b, 3.5)
+
+RETURN a

@@ -1,0 +1,11 @@
+SET i = 2
+SET a[0] = 1
+SET a[1] = 1
+
+WHILE i < 10 DO
+  SET a[i] = a[i - 1] + a[i - 2]
+  SET i = i + 1
+END
+
+ASSERT a[9] == 55
+

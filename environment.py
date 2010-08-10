@@ -162,7 +162,7 @@ def get_time():
 global_bindings[u'SERVER_TIME'] = Function(get_time)
 global_bindings[u'WRITE_LOG'] = Function(fun_WRITE_LOG, [u'SYSTEM_LOG'])
 
-def lookup(key, binding=None):
+def lookup(key, binding=None, allow_null=False):
     if not binding:
         binding = current_bindings
         
@@ -172,7 +172,8 @@ def lookup(key, binding=None):
     else:
         if binding.outer != None:
             return lookup(key, binding.outer)
-        logging.error('Cannot find ' + key + ' in context')
+        if not allow_null:
+            logging.error('Cannot find ' + key + ' in context')
         return None
     
 def set(key, value, binding=None, bounded=False):

@@ -37,6 +37,17 @@ stmt returns [scope]
 }
     : ^('=' ID expr) {
             $scope = Stmt(lambda: set($ID.text, $expr.value.eval()), $ID.token.line) }
+    | ^('=' ^(DICT ID index=expr) e=expr) {
+            def action():
+                d = lookup($ID.text, allow_null=True)
+                if d == None:
+                    d = {}
+                    set($ID.text, d)
+                idx = index.eval()
+                val = e.eval()
+                logging.debug('Set %s[%s] to %s' % ($ID.text, repr(idx), repr(val)))
+                d[idx] = val
+            $scope = Stmt(action, $ID.token.line) }
     | code_block { $scope = $code_block.scope }
     | NOP { $scope = Expr(lambda: None) }
     | ^(RETURN expr) {
@@ -117,7 +128,7 @@ expr returns [value]
     | ^(OR a=expr b=expr) { $value = Expr(lambda: a.eval() or b.eval()) }
     | ^(NOT a=expr) { $value = Expr(lambda: not a.eval()) }
     | ID {$value = Expr(lambda: lookup($ID.text))}
-    | ^(ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
+    | ^(DICT ID e=expr) {$value = Expr(lambda: lookup($ID.text)[e.eval()])}
     | call { $value = $call.value }
     | STRING_LITERAL { $value = Expr(lambda: $STRING_LITERAL.text) }
     | INTEGER { $value = Expr(lambda: int($INTEGER.text)) }
