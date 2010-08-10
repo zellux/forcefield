@@ -73,7 +73,9 @@ class AjaxHandler(tornado.web.RequestHandler):
             self.write('Not running')
             return
         p = sessions[url]
-        p.send_signal(signal.SIGUSR1)
+        # Python 2.5 compatibile way to send signal
+        os.kill(p.pid, signal.SIGUSR1)
+        # p.send_signal(signal.SIGUSR1)
         count = 0
         terminated = False
         self.write('stdout\n')
