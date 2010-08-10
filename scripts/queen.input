@@ -1,5 +1,4 @@
 SET n = HTTP["n"]
-SET row = 0
 
 FOR i = 0 TO n - 1 STEP 1 DO
   SET col[i] = 0
@@ -7,7 +6,7 @@ END
 
 SET found = 0
 
-FUNC search()
+FUNC search(row)
   IF row >= n THEN
     SET found = 1
     RETURN 1
@@ -36,18 +35,16 @@ FUNC search()
     END
 
     IF valid == 1 THEN
-      SET row = row + 1
-      search()
+      search(row + 1)
       IF found == 1 THEN
         RETURN 1
       END
-      SET row = row - 1
     END
   END
   RETURN 0
 END
 
-SET solved = search()
+SET solved = search(0)
 
 IF solved == 0 THEN
   RETURN "No solution"

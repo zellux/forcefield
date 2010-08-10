@@ -80,38 +80,6 @@ class AjaxHandler(tornado.web.RequestHandler):
         # p.send_signal(signal.SIGUSR1)
         count = 0
         terminated = False
-        self.write('stdout\n')
-        # while True:
-        #     line = p.stdout.readline()
-        #     if len(line.strip()) == 0:
-        #         count += 1
-        #         if count > 10:
-        #             terminated = True
-        #             break
-        #         continue
-        #     logging.debug(line)
-        #     self.write(line + '\n')
-        #     if line.strip() == 'END':
-        #         break
-        #     if line.strip() == 'TERMINATED':
-        #         terminated = True
-        #         break
-        # self.write('stderr\n')
-        # while True:
-        #     line = p.stderr.readline()
-        #     if len(line.strip()) == 0:
-        #         count += 1
-        #         if count > 10:
-        #             terminated = True
-        #             break
-        #         continue
-        #     logging.debug(line)
-        #     self.write(line + '\n')
-        #     if line.strip() == 'END':
-        #         break
-        #     if line.strip() == 'TERMINATED':
-        #         terminated = True
-        #         break
         endcount = 0
         while True:
             more = False
