@@ -82,7 +82,7 @@ class Function:
         for (k, v) in paramvalues:
             set(k, v, bounded=True)
         
-        # current_bindings.dump()
+        current_bindings.dump()
         try:
             logging.debug('call')
             self.action()
@@ -130,9 +130,10 @@ class Binding(dict):
 
     def dump(self):
         '''Debugging routine for dumping current bindings'''
+        sys.stderr.write('Binding dumps\n')
         indent = ['**'] # Hacking for "read-only" Python outer scope binding
         def ptree(d):
-            if d.outer:
+            if d.outer != None:
                 ptree(d.outer)
             for k, v in d.iteritems():
                 if isinstance(v, int) or isinstance(v, dict) or isinstance(v, float):
@@ -163,7 +164,7 @@ global_bindings[u'SERVER_TIME'] = Function(get_time)
 global_bindings[u'WRITE_LOG'] = Function(fun_WRITE_LOG, [u'SYSTEM_LOG'])
 
 def lookup(key, binding=None, allow_null=False):
-    if not binding:
+    if binding == None:
         binding = current_bindings
         
     if binding.has_key(key):

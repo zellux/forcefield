@@ -2,7 +2,7 @@ function stepinto() {
   $.ajax({
     type: "GET",
     // Use random to avoid browser Ajax bug
-    url: '/ajax/function_test?random=' + new Date().getTime(),
+    url: '/ajax/' + fname + '?random=' + new Date().getTime(),
     timeout: 1000,
     success: function(data) {
       lines = data.split('\n');

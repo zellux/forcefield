@@ -1,0 +1,65 @@
+SET n = HTTP["n"]
+SET row = 0
+
+FOR i = 0 TO n - 1 STEP 1 DO
+  SET col[i] = 0
+END
+
+SET found = 0
+
+FUNC search()
+  IF row >= n THEN
+    SET found = 1
+    RETURN 1
+  END
+
+  IF found == 1 THEN
+    RETURN 1
+  END
+
+  FOR col[row] = 0 TO n - 1 STEP 1 DO
+    SET valid = 1
+    FOR i = 0 TO row - 1 STEP 1 DO
+      IF col[row] == col[i] THEN
+        SET valid = 0
+      END
+    END
+    FOR i = 0 TO row - 1 STEP 1 DO
+      IF col[row] - row  == col[i] - i THEN
+        SET valid = 0
+      END
+    END
+    FOR i = 0 TO row - 1 STEP 1 DO
+      IF col[row] + row  == col[i] + i THEN
+        SET valid = 0
+      END
+    END
+
+    IF valid == 1 THEN
+      SET row = row + 1
+      search()
+      IF found == 1 THEN
+        RETURN 1
+      END
+      SET row = row - 1
+    END
+  END
+  RETURN 0
+END
+
+SET solved = search()
+
+IF solved == 0 THEN
+  RETURN "No solution"
+END
+
+SET ret = ""
+
+FOR i = 0 TO n - 1 STEP 1 DO
+  SET ret = ret + "o" * col[i]
+  SET ret = ret + "x"
+  SET ret = ret + "o" * (n - col[i] - 1)
+  SET ret = ret + "<br>"
+END
+
+RETURN ret

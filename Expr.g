@@ -53,7 +53,7 @@ stmt
     | func_stmt
     | assert_stmt
     | remote_stmt
-    | NEWLINE ->
+    | NEWLINE -> NOP
     ;
 
 set_stmt
