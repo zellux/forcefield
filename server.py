@@ -49,7 +49,7 @@ class DebugHandler(tornado.web.RequestHandler):
             p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             sessions[url] = p
         src = open(filename, 'r').read()
-        self.render('template.html', source=src, random=random.randint(1, 100000))
+        self.render('template.html', source=src, random=random.randint(1, 100000), fname=url)
 
 class LogHandler(tornado.web.RequestHandler):
     def get(self, url):
