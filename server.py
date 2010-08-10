@@ -5,8 +5,10 @@ import tornado.httpserver
 import tornado.web
 import os, sys, cgi
 import base64
+import time
 from urllib2 import urlparse
 from subprocess import Popen
+from asyncproc import Process
 import subprocess
 import mutex
 
@@ -46,7 +48,7 @@ class DebugHandler(tornado.web.RequestHandler):
             decoded = base64.b64encode(repr(args))
             cmd = 'python trace.py --param="%s"' % decoded
             logging.debug(cmd)
-            p = Popen(cmd, shell=True, stdin=script, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            p = Process(cmd, stdin=script, shell=True)
             sessions[url] = p
         src = open(filename, 'r').read()
         self.render('template.html', source=src, random=random.randint(1, 100000), fname=url)
@@ -74,42 +76,67 @@ class AjaxHandler(tornado.web.RequestHandler):
             return
         p = sessions[url]
         # Python 2.5 compatibile way to send signal
-        os.kill(p.pid, signal.SIGUSR1)
+        p.kill(signal.SIGUSR1)
         # p.send_signal(signal.SIGUSR1)
         count = 0
         terminated = False
         self.write('stdout\n')
+        # while True:
+        #     line = p.stdout.readline()
+        #     if len(line.strip()) == 0:
+        #         count += 1
+        #         if count > 10:
+        #             terminated = True
+        #             break
+        #         continue
+        #     logging.debug(line)
+        #     self.write(line + '\n')
+        #     if line.strip() == 'END':
+        #         break
+        #     if line.strip() == 'TERMINATED':
+        #         terminated = True
+        #         break
+        # self.write('stderr\n')
+        # while True:
+        #     line = p.stderr.readline()
+        #     if len(line.strip()) == 0:
+        #         count += 1
+        #         if count > 10:
+        #             terminated = True
+        #             break
+        #         continue
+        #     logging.debug(line)
+        #     self.write(line + '\n')
+        #     if line.strip() == 'END':
+        #         break
+        #     if line.strip() == 'TERMINATED':
+        #         terminated = True
+        #         break
+        endcount = 0
         while True:
-            line = p.stdout.readline()
-            if len(line.strip()) == 0:
-                count += 1
-                if count > 10:
+            more = False
+            output = p.read()
+            if output.strip() != "":
+                self.write(output)
+                if 'TERMINATED' in output:
                     terminated = True
-                    break
-                continue
-            logging.debug(line)
-            self.write(line + '\n')
-            if line.strip() == 'END':
-                break
-            if line.strip() == 'TERMINATED':
-                terminated = True
-                break
-        self.write('stderr\n')
-        while True:
-            line = p.stderr.readline()
-            if len(line.strip()) == 0:
-                count += 1
-                if count > 10:
+                if 'END' in output:
+                    endcount += 1
+                more = True
+            output = p.readerr()
+            if output.strip() != "":
+                self.write(output)
+                if 'TERMINATED' in output:
                     terminated = True
-                    break
-                continue
-            logging.debug(line)
-            self.write(line + '\n')
-            if line.strip() == 'END':
+                if 'END' in output:
+                    endcount += 1
+                more = True
+            if endcount == 2: break
+            if more:
+                time.sleep(0.05)
+            else:
                 break
-            if line.strip() == 'TERMINATED':
-                terminated = True
-                break
+
         if terminated:
             sessions.pop(url)
             self.write('??')

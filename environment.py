@@ -82,7 +82,6 @@ class Function:
         for (k, v) in paramvalues:
             set(k, v, bounded=True)
         
-        current_bindings.dump()
         try:
             logging.debug('call')
             self.action()
