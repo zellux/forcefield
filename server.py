@@ -46,9 +46,9 @@ class DebugHandler(tornado.web.RequestHandler):
         if not sessions.has_key(url):
             script = open(filename, 'r')
             decoded = base64.b64encode(repr(args))
-            cmd = 'python trace.py --param="%s"' % decoded
-            logging.debug(cmd)
-            p = Process(cmd, stdin=script, shell=True)
+            param = '--param="%s"' % decoded
+            logging.debug(param)
+            p = Process(['python', 'trace.py', param], stdin=script)
             sessions[url] = p
         src = open(filename, 'r').read()
         self.render('template.html', source=src, random=random.randint(1, 100000), fname=url)
@@ -75,8 +75,10 @@ class AjaxHandler(tornado.web.RequestHandler):
             self.write('Not running')
             return
         p = sessions[url]
+        print p.pid()
         # Python 2.5 compatibile way to send signal
-        p.kill(signal.SIGUSR1)
+        os.kill(p.pid(), signal.SIGUSR1)
+        # p.kill(signal.SIGUSR1)
         # p.send_signal(signal.SIGUSR1)
         count = 0
         terminated = False
@@ -84,6 +86,7 @@ class AjaxHandler(tornado.web.RequestHandler):
         while True:
             more = False
             output = p.read()
+            logging.debug("stdout: " + output + "----")
             if output.strip() != "":
                 self.write(output)
                 if 'TERMINATED' in output:
@@ -92,6 +95,7 @@ class AjaxHandler(tornado.web.RequestHandler):
                     endcount += 1
                 more = True
             output = p.readerr()
+            logging.debug("stderr: " + output + "----")
             if output.strip() != "":
                 self.write(output)
                 if 'TERMINATED' in output:
@@ -105,10 +109,6 @@ class AjaxHandler(tornado.web.RequestHandler):
             else:
                 break
 
-        if terminated:
-            sessions.pop(url)
-            self.write('??')
-        
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),
 }
