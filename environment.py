@@ -11,6 +11,7 @@ lastlineno = -1
 tracehook = None
 
 def parse_value(value):
+    '''Try to detect type of a string. In the order of int > float > string'''
     try:
         x = int(value)
         return x
@@ -23,6 +24,7 @@ def parse_value(value):
             
 
 class ReturnValue(Exception):
+    '''Return value to the outer block, by exception mechanism'''
     def __init__(self, value):
         self.value = value
 
@@ -30,11 +32,13 @@ class ReturnValue(Exception):
         return self.value
 
 class Stmt:
+    '''Statement class'''
     def __init__(self, action=None, lineno=-1):
         self.lineno = lineno
         self.action = action
         
     def eval(self):
+        '''Called when the statement is actually interpreted'''
         global lastlineno
         lastlineno = self.lineno
         if tracehook != None and self.lineno > 0: tracehook()
@@ -44,10 +48,12 @@ class Stmt:
             self.action()
 
 class Expr:
+    '''Expression class'''
     def __init__(self, action=None):
         self.action = action
 
     def eval(self):
+        '''Called when the expression value is actually needed'''
         if not self.action:
             logging.warning('expression has no assigned action')
         else:
@@ -92,6 +98,7 @@ class Function:
             return v.getValue()
 
 class RemoteCall:
+    '''Remote call class'''
     def __init__(self, sname, fname, paramdef=[]):
         '''
         sname: script name
@@ -102,6 +109,8 @@ class RemoteCall:
         self.paramdef = paramdef
         
     def call(self, values = []):
+        '''Similar to what Function.call() does, except that it gets value
+        by HTTP requests.'''
         if not server_list.has_key(self.sname):
             logging.error('No such server: %s!' % self.sname)
             return None
@@ -123,6 +132,7 @@ class RemoteCall:
         return retval
         
 class Binding(dict):
+    '''Binding class'''
     def __init__(self, outer=None):
         dict.__init__(self)
         self.outer = outer
@@ -148,6 +158,7 @@ class Binding(dict):
         ptree(self)
         
 def fun_WRITE_LOG():
+    '''Built-in function WRITE_LOG'''
     f = open("logs.txt", "a")
     f.write(lookup('SYSTEM_LOG').encode('utf-8'))
     f.write('\n')
@@ -163,6 +174,7 @@ global_bindings[u'SERVER_TIME'] = Function(get_time)
 global_bindings[u'WRITE_LOG'] = Function(fun_WRITE_LOG, [u'SYSTEM_LOG'])
 
 def lookup(key, binding=None, allow_null=False):
+    '''Lookup variable value in current scope, if not found, go to outer scope'''
     if binding == None:
         binding = current_bindings
         
@@ -200,6 +212,7 @@ def set(key, value, binding=None, bounded=False):
     binding.__setitem__(key, value)
 
 def add(op1, op2):
+    '''Add op1 and op2'''
     logging.debug('Adding ' + repr(op1) + ' and ' + repr(op2))
     if isinstance(op1, int) or isinstance(op1, float):
         return op1 + op2
@@ -209,6 +222,7 @@ def add(op1, op2):
         logging.warning('Unknown type ' + str(type(op1)))
 
 def ret(value):
+    '''Return value by raising an exception'''
     logging.debug('Returning ' + unicode(value))
     raise ReturnValue(value)
 
