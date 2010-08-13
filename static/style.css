@@ -27,11 +27,11 @@ body {
     background-color: #EDF3FE;
     border: 1px solid;
     text-align: center;
-}
-
-#nextbtn {
     font-size: 24px;
     font-weight: bold;
+}
+
+div#controlpanel a {
     text-decoration: none;
     color: #f00;
 }

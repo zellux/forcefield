@@ -1,0 +1,26 @@
+FUNC ADD(a, b)
+  RETURN a + b
+END
+
+FUNC MULTI(a, b)
+  RETURN a * b
+END
+
+FUNC MINUS(a, b)
+  RETURN a - b
+END
+
+FUNC CALC(op, a, b)
+  RETURN op(a, b)
+END
+
+SET x = 10
+SET y = 5
+
+SET a = CALC(MINUS, x, y)
+SET b = CALC(ADD, x, y)
+SET c = CALC(MULTI, x, y)
+
+ASSERT a == 5
+ASSERT b == 15
+ASSERT c == 50

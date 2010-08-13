@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-    <title>Hello SyntaxHighlighter</title>
+    <title>ForceField在线调试器</title>
     <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shCore.js"></script>
     <script type="text/javascript" src="/static/syntaxhighlighter/scripts/shBrushFF.js"></script>
     <script type="text/javascript" src="/static/jquery-1.4.2.min.js"></script>	
@@ -14,7 +14,8 @@
   <body>
     <div id="body">
     <div id="controlpanel">
-        <a id="nextbtn" href="#">next</a>
+        <a id="nextbtn" href="#">step into</a> | 
+        <a id="restartbtn" href="#">restart</a>
     </div>
     <div id="codearea">
       <pre class="brush: ff" style="background-color: #3333ff;">{{ source }} </pre>

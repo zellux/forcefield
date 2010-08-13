@@ -103,15 +103,15 @@ call returns [value, line]
     l = []
 }
     : ^(CALL ID ^(ARGLIST (e=expr { l.append(e) })*)) {
-        def callfunc():
-            defun = lookup($ID.text)
-            if not isinstance(defun, Function) and not isinstance(defun, RemoteCall):
-                logging.error("Function " + $ID.text + " was not defined")
-                return None
-            else:
-                return defun.call(map(lambda x: x.eval(), l))
-        $value = Expr(callfunc)
-        $line=$ID.token.line}
+            def callfunc():
+                defun = lookup($ID.text)
+                if not isinstance(defun, Function) and not isinstance(defun, RemoteCall):
+                    logging.error("Function " + $ID.text + " was not defined")
+                    return None
+                else:
+                    return defun.call(map(lambda x: x.eval(), l))
+            $value = Expr(callfunc)
+            $line=$ID.token.line }
     ;
 
 expr returns [value]

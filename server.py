@@ -43,13 +43,15 @@ class DebugHandler(tornado.web.RequestHandler):
         if not os.path.exists(filename):
             logging.warning('script does not exist!')
             raise tornado.web.HTTPError(404)
-        if not sessions.has_key(url):
-            script = open(filename, 'r')
-            decoded = base64.b64encode(repr(args))
-            param = '--param="%s"' % decoded
-            logging.debug(param)
-            p = Process(['python', 'trace.py', param], stdin=script)
-            sessions[url] = p
+        if sessions.has_key(url):
+            logging.debug('Restart ' + url)
+            sessions[url].terminate()
+        script = open(filename, 'r')
+        decoded = base64.b64encode(repr(args))
+        param = '--param="%s"' % decoded
+        logging.debug(param)
+        p = Process(['python', 'trace.py', param], stdin=script)
+        sessions[url] = p
         src = open(filename, 'r').read()
         self.render('template.html', source=src, random=random.randint(1, 100000), fname=url)
 
@@ -108,6 +110,11 @@ class AjaxHandler(tornado.web.RequestHandler):
                 time.sleep(0.05)
             else:
                 break
+            
+        if terminated:
+            sessions.pop(url)
+            self.write('\n??')
+            
 
 settings = {
     "static_path": os.path.join(os.path.dirname(__file__), "static"),

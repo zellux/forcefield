@@ -82,4 +82,7 @@ $(function () {
     stepinto();
     return false;
   });
+  $("#restartbtn").click(function() {
+    location.reload();
+  });
 });
