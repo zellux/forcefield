@@ -71,20 +71,26 @@ class Function:
         self.action = action
         self.paramdef = paramdef
 
-    def call(self, values = []):
+    def call(self, values = [], new_binding=True):
         # Return value, i.e., function as expression
 
         if not self.action:
             logging.warning('Function has no assigned action')
             return
-        
-        global current_bindings
-        prev = current_bindings
-        current_bindings = Binding(current_bindings)
+
+        if len(values) < len(self.paramdef):
+            # Given arguments less than parameters, currying
+            logging.debug('values=' + repr(values))
+            return CurryFunction(values, self.paramdef, self.action)
         
         paramvalues = zip(self.paramdef, values)
         if len(paramvalues) != len(self.paramdef):
             logging.warning('Not enough parameters!')
+            
+        global current_bindings
+        prev = current_bindings
+        current_bindings = Binding(current_bindings)
+        
         for (k, v) in paramvalues:
             set(k, v, bounded=True)
         
@@ -97,7 +103,31 @@ class Function:
             logging.debug(repr(v.getValue()))
             return v.getValue()
 
-class RemoteCall:
+    def __str__(self):
+        return 'Function ' + str(self.paramdef)
+
+    def __repr__(self):
+        return 'Function ' + repr(self.paramdef)
+
+    def __unicode__(self):
+        return u'Function ' + unicode(self.paramdef)
+
+class CurryFunction(Function):
+    '''Currying function'''
+    def __init__(self, values=[], paramdef=[], action=None):
+        l = len(values)
+        self.paramdef = paramdef[l:]
+        self.curryvalues = zip(paramdef[:l], values)
+        self.nextaction = action
+        logging.debug(repr(self.curryvalues))
+
+    def action(self):
+        # When this function is called, new environment is already created
+        for (k, v) in self.curryvalues:
+            set(k, v, bounded=True)
+        self.nextaction()
+    
+class RemoteCall(Function):
     '''Remote call class'''
     def __init__(self, sname, fname, paramdef=[]):
         '''
@@ -145,14 +175,7 @@ class Binding(dict):
             if d.outer != None:
                 ptree(d.outer)
             for k, v in d.iteritems():
-                if isinstance(v, int) or isinstance(v, dict) or isinstance(v, float):
-                    value = unicode(v)
-                elif isinstance(v, Function):
-                    value = u'Function'
-                elif isinstance(v, RemoteCall):
-                    value = u'Remote call'
-                else:
-                    value = u'"' + unicode(v) + u'"'
+                value = unicode(v)
                 sys.stderr.write((indent[0] + k + ':' + value + '\n').encode('utf-8'))
             indent[0] += '**'
         ptree(self)
